@@ -33,16 +33,9 @@ window.log = (function () {
         return val;
       };
     })({
-      PROJECT_NAME: "tomekwlodtools",
+      PROJECT_NAME: "tomekwlod",
   NODE_PORT: "7898",
   GITHUB_SOURCES_PREFIX: "https://github.com/tomekwlod/tomekwlod.github.io",
-  FIREBASE_API_KEY: "AIzaSyB6lAe7IMCxkjIJMHEXpS26emx-yLQOol8",
-  FIREBASE_AUTH_DOMAIN: "github-f6a5f.firebaseapp.com",
-  FIREBASE_DATABASE_URL: "https://github-f6a5f.firebaseio.com",
-  FIREBASE_PROJECT_ID: "github-f6a5f",
-  FIREBASE_STORAGE_BUCKET: "github-f6a5f.appspot.com",
-  FIREBASE_MESSAGING_SENDER_ID: "389489861217",
-  FIREBASE_API_ID: "1:389489861217:web:c7effb017403f3c45ac020",
     });
     
     log("const env = window.env");
