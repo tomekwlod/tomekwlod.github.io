@@ -86,4 +86,4 @@ function clone() {
   )
 }
 
-clone git@github.com:stopsopa/stopsopa.github.io.git stopsopa
+clone git@github.com:tomekwlod/tomekwlod.github.io.git tomekwlod

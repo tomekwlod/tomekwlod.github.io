@@ -33,9 +33,9 @@ window.log = (function () {
         return val;
       };
     })({
-      PROJECT_NAME: "stopsopatools",
+      PROJECT_NAME: "tomekwlodtools",
   NODE_PORT: "7898",
-  GITHUB_SOURCES_PREFIX: "https://github.com/stopsopa/stopsopa.github.io",
+  GITHUB_SOURCES_PREFIX: "https://github.com/tomekwlod/tomekwlod.github.io",
   FIREBASE_API_KEY: "AIzaSyB6lAe7IMCxkjIJMHEXpS26emx-yLQOol8",
   FIREBASE_AUTH_DOMAIN: "github-f6a5f.firebaseapp.com",
   FIREBASE_DATABASE_URL: "https://github-f6a5f.firebaseio.com",

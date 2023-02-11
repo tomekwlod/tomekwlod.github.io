@@ -1,6 +1,6 @@
 
 start:
-	/bin/bash dev.sh STOPSOPA_IO_FLAG
+	/bin/bash dev.sh TOMEKWLOD_IO_FLAG
 
 .PHONY: build
 build:

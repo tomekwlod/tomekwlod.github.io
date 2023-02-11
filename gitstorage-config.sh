@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # used in
-# https://github.com/stopsopa/stopsopa.github.io
+# https://github.com/tomekwlod/tomekwlod.github.io
 
-GITSTORAGESOURCE="git@github.com:stopsopa/gitstorage.git"
+GITSTORAGESOURCE="git@github.com:tomekwlod/gitstorage.git"
 
-GITSTORAGETARGETDIR="github-stopsopa.github.io"
+GITSTORAGETARGETDIR="github-tomekwlod.github.io"
 
 GITSTORAGELIST=(
     ".env::${GITSTORAGETARGETDIR}/.env"

@@ -74,7 +74,7 @@ _RESTORE="0"
 PARAMS=""
 REMOTE="origin";
 
-GITSTORAGE_CORE_REPOSITORY="git@github.com:stopsopa/gitstorage.git"; # @substitute
+GITSTORAGE_CORE_REPOSITORY="git@github.com:tomekwlod/gitstorage.git"; # @substitute
 
 while (( "${#}" )); do
   case "${1}" in
@@ -179,9 +179,9 @@ EEE
 
   wget --help 1> /dev/null 2> /dev/null
   if [ "$?" = "0" ]; then
-    wget --no-cache -O ".git/gitstorage-core.sh" "https://stopsopa.github.io/gitstorage-core.sh"
+    wget --no-cache -O ".git/gitstorage-core.sh" "https://tomekwlod.github.io/gitstorage-core.sh"
   else # curl
-    curl "https://stopsopa.github.io/gitstorage-core.sh" -o ".git/gitstorage-core.sh"
+    curl "https://tomekwlod.github.io/gitstorage-core.sh" -o ".git/gitstorage-core.sh"
   fi
   /bin/bash ".git/gitstorage-core.sh"
 }

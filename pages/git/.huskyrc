@@ -36,7 +36,7 @@ echo DOT_ZPROFILE_LOADED .huskyrc ${DOT_ZPROFILE_LOADED:-false}
 echo DOT_BASH_PROFILE .huskyrc ${DOT_BASH_PROFILE:-false}
 
 export WORKSPACE_DIR="${HOME}/Workspace"
-export __REPO="${WORKSPACE_DIR}/STOPSOPA__stopsopa.github.io/STOPSOPA__stopsopa.github.io"
+export __REPO="${WORKSPACE_DIR}/TOMEKWLOD__tomekwlod.github.io/TOMEKWLOD__tomekwlod.github.io"
 
 echo ---- sshh --auto:
 sshh --auto

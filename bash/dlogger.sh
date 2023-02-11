@@ -3,7 +3,7 @@ while IFS= read -r line; do
   printf '[%s %s %s]%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" "$2" "$line" 
 done
 
-# full example how to use it: https://stopsopa.github.io/pages/bash/index.html?admin:password#prepend-date-to-each-stream-line
+# full example how to use it: https://tomekwlod.github.io/pages/bash/index.html?admin:password#prepend-date-to-each-stream-line
 
 
 # cat <<EEE > dlogger.sh

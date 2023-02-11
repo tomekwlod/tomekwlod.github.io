@@ -95,7 +95,7 @@ function clone() {
   )
 }
 
-clone git@github.com:stopsopa/c.git stopsopa
+clone git@github.com:tomekwlod/c.git tomekwlod
 
-clone git@github.com:stopsopa/cpp.git stopsopa
+clone git@github.com:tomekwlod/cpp.git tomekwlod
 

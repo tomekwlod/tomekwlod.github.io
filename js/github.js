@@ -647,7 +647,7 @@ log.green("defined", "window.trim");
         var header = document.createElement("header");
 
         header.innerHTML = `
-    <a href="/index.html">stopsopa.github.io</a>
+    <a href="/index.html">tomekwlod.github.io</a>
 `;
 
         manipulation.prepend(body, header);
@@ -682,9 +682,9 @@ log.green("defined", "window.trim");
 
 // edit & profile ribbons
 (function () {
-  // https://github.com/stopsopa/stopsopa.github.io/edit/master/demos/jquery.elkanatooltip/katownik.html
-  // https://stopsopa.github.io/
-  // user stopsopa
+  // https://github.com/tomekwlod/tomekwlod.github.io/edit/master/demos/jquery.elkanatooltip/katownik.html
+  // https://tomekwlod.github.io/
+  // user tomekwlod
   // path /pages/css-grid/index.html
 
   window.isDevEnvironment = location.port !== "";
@@ -709,7 +709,7 @@ log.green("defined", "window.trim");
     // log('github', github)
 
     return github;
-  })("stopsopa.github.io");
+  })("tomekwlod.github.io");
 
   log.green("defined", "window.github - link of edit page on github: " + github);
 
@@ -778,7 +778,7 @@ body .github-link > a:hover {
 
     a.innerText = "profile";
 
-    a.setAttribute("href", "//github.com/stopsopa?tab=repositories");
+    a.setAttribute("href", "//github.com/tomekwlod?tab=repositories");
 
     manipulation.append(document.body, a);
 
@@ -821,7 +821,7 @@ body .github-profile:hover {
   })();
 
   if (window.isDevEnvironment) {
-    // for some reason (maybe due to /etc/hosts record to handle local server from domain http://stopsopa.github.io.local/
+    // for some reason (maybe due to /etc/hosts record to handle local server from domain http://tomekwlod.github.io.local/
     // there is huge delay in the locahost server request from the browser
     // The idea behind pinging it every few seconds is to maybe somehow keep local dns cache fresh
     setInterval(() => {

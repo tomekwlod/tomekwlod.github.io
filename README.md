@@ -29,7 +29,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>stopsopa.github.io</title>
+    <title>tomekwlod.github.io</title>
   </head>
   <body class="layout" toc>
     <div class="body">
@@ -73,7 +73,7 @@
         <meta name="viewport"
               content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>stopsopa.github.io</title>
+        <title>tomekwlod.github.io</title>
 
             <script> <!-- optional to do something before binding ACE editor -->
                 (function () {
@@ -125,7 +125,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>stopsopa.github.io</title>
+    <title>tomekwlod.github.io</title>
 
     <script src="/public/preprocessed.js"></script>
     <script>
@@ -202,10 +202,10 @@ When you hold CMD button and click any link anywhere in the content of ace edito
 
 # other
 
-http://httpd.pl/stopsopa.github.io/index.html
-http://httpd.pl/stopsopa.github.io/demos/jquery.elkanatooltip/demo.html
+http://httpd.pl/tomekwlod.github.io/index.html
+http://httpd.pl/tomekwlod.github.io/demos/jquery.elkanatooltip/demo.html
 http://httpd.pl/dropdown
-http://httpd.pl/stopsopa.github.io/demos/jquery.elkanatooltip/pos.html
+http://httpd.pl/tomekwlod.github.io/demos/jquery.elkanatooltip/pos.html
 
 # firebase
 
@@ -246,8 +246,8 @@ add rules to database:
 
 # to maintain:
 
-http://stopsopa.github.io/demos/jquery.elkanatooltip/katownik.html
-http://stopsopa.github.io/demos/jquery.elkanatooltip/pos.html
+http://tomekwlod.github.io/demos/jquery.elkanatooltip/katownik.html
+http://tomekwlod.github.io/demos/jquery.elkanatooltip/pos.html
 
 # cross origin requests:
 

@@ -3,7 +3,7 @@
 # There is another though to autmaticaly register key
 # everytime you run terminal called add.sh
 # To install visit link:
-#     https://stopsopa.github.io/pages/ssh/index.html#sshh-manually-swap-ssh-key
+#     https://tomekwlod.github.io/pages/ssh/index.html#sshh-manually-swap-ssh-key
 #
 # To see help just run
 # /bin/bash ${0} --help

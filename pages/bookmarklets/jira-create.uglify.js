@@ -1,6 +1,6 @@
 /**
  * Jira create ticket - script to widen "Project" dropdown
- * https://stopsopa.github.io/pages/bookmarklets/index.html#jira-create-ticket-script-to-widen-project-dropdown
+ * https://tomekwlod.github.io/pages/bookmarklets/index.html#jira-create-ticket-script-to-widen-project-dropdown
  */
 (function () {
   var log = (function () {

@@ -10,7 +10,7 @@
 # you might specify directory as an argument (to override SSHH_DIR_WITH_KEYS)
 #        /bin/bash /Volumes/WINSCP/ssh/ssh/add.sh firstkey secondkey -d path/to/directory/with/keys
 # and then also use sshh script from:
-# https://stopsopa.github.io/pages/ssh/index.html#sshh-manually-swap-ssh-key
+# https://tomekwlod.github.io/pages/ssh/index.html#sshh-manually-swap-ssh-key
 #
 # you might unzip directory before mounting
 # /bin/bash 7zunseal.sh --7z_file /Users/sdzialowski/.ssh/keys.7z --7z_del_dir /Users/sdzialowski/.ssh/keys -- /bin/bash /Volumes/WINSCP/ssh/ssh/add.sh firstkey secondkey
