@@ -185,19 +185,22 @@
 
           <h2>Secrets</h2>
           <script type="editor" data-lang="sh">
-
             # will create, but fired second time will fail
             kubectl create secret generic db-user-pass --from-literal=abc=def --from-literal=ghi=jkl
-
+            
             # will create and also update, better version
             kubectl create secret generic db-user-pass --from-literal=abc=def --from-literal=ghi=jkl --dry-run -o yaml | kubectl apply -f -
-
+            
             # If you have to edit particular value in existing secret by editing yaml then
             # be aware that values of secrets are encoded in bas64
             # so in order to quickly generate value use
             echo "[your value]" | base64
             # and
             kubectl edit secret [name of secret]
+
+            # If you have an env file, eg .env you can create a secret based on it in two ways:
+            --from-file # results in one key (named after the input file) with the content of the file
+            --from-env-file # expands the keys inside the file into the secret
           </script>
           <h2>Context</h2>
           <script type="editor" data-lang="sh">
