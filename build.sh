@@ -43,11 +43,11 @@ if [ "${LOCAL_HOSTS}" = "" ]; then
     exit 1
 fi
 
-node pages/portsregistry/lists/ports-generator.js
+# node pages/portsregistry/lists/ports-generator.js
 
 # call those together in this order vvv
 /bin/bash uglify.sh
-/bin/bash template.sh
+# /bin/bash template.sh
 # call those together in this order ^^^
 
 node libs/preprocessor.js

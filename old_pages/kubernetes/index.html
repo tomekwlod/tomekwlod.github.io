@@ -183,18 +183,6 @@
           <h2>Kustomize</h2>
           <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/">https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/</a>
 
-          <h2>Certificates</h2>
-          <script type="editor" data-lang="sh">
-            kubectl describe cert <certname>
-            # this should show a cert details with the lines similar to the below:
-            Not After:       2023-04-04T15:38:58Z    - is the Certificate's expiry date
-            Not Before:      2023-01-04T15:38:59Z    - is typically the date when the certificate was created. That is, if you didn't explicitly populate it this field in your Certificate resource YAML
-            Renewal Time:    2023-03-05T15:38:58Z    - is the 30-day mark before the Certificate expires
-
-            # to get only renewal time (can be run in a loop maybe?):
-            kubectl get certificate -o=jsonpath='{.items[].status.renewalTime}'
-          </script>
-          
           <h2>Secrets</h2>
           <script type="editor" data-lang="sh">
             # will create, but fired second time will fail
