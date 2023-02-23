@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>tomekwlod.github.io</title>
+  </head>
+  <body class="layout" toc>
+    <div class="body">
+      <div class="inside">
+        <div class="cards">
+          <h2>Goroutines</h2>
+          <h3>Simple example with a channel</h3>
+          <script type="editor" data-lang="golang">
+            package main
+
+            import (
+            	"fmt"
+            	"math/rand"
+            	"time"
+            )
+
+            // Simple example of how to use goroutines with channels
+
+            func main() {
+            	channel := make(chan string)
+
+            	go fn(channel)
+
+            	for {
+            		_msg, open := <-channel
+
+            		if !open {
+            			break
+            		}
+
+            		fmt.Println(_msg)
+            	}
+            }
+
+            func fn(ch chan string) {
+            	rand.Seed(time.Now().UnixNano())
+
+            	for i := 0; i < 3; i++ {
+            		score := rand.Intn(10)
+
+            		ch <- fmt.Sprintf("Score: %d", score)
+            	}
+
+            	// if we don't close the channel, the loop in the main() function will
+            	// produce a deadlock error as the loop would keep running for ever
+            	close(ch)
+            }
+          </script>
+        </div>
+      </div>
+    </div>
+    <script src="/js/github.js"></script>
+  </body>
+</html>

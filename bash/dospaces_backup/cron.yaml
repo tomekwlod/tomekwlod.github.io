@@ -1,0 +1,40 @@
+# remove this line with envrender.sh --rmfirst parameter
+apiVersion: batch/v1
+# apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ${PROJECT_NAME_GENERATED}-cronjob
+  # name: ${PROJECT_NAME_GENERATED}-cronjob-${FILENAME}
+  namespace: ${NAMESPACE}
+spec:
+  schedule: "${PROTECTED_KUB_CRONJOB_TIME}" # https://pkg.go.dev/github.com/robfig/cron?tab=doc#hdr-CRON_Expression_Format
+  concurrencyPolicy: Forbid # https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-job-limitations
+
+  # https://stackoverflow.com/a/43116061
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+
+  jobTemplate:
+    spec:
+      # https://cloud.google.com/kubernetes-engine/docs/how-to/jobs
+      backoffLimit: 0 # https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#pod-backoff-failure-policy
+      template:
+        spec:
+          # suggested by https://stackoverflow.com/a/51687712
+          restartPolicy: Never # https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#job-termination-and-cleanup
+          containers:
+            - name: godocronbackup
+              image: "$DOCKER_REGISTRY/$PROJECT_NAME_GENERATED:$TAG" # docker run -p 8082:80 docker-registry.phaseiilabs.com/tapp:0.0.12
+              command:
+                - /bin/bash
+                - $COMMAND_TO_RUN
+              volumeMounts:
+                - name: bckp
+                  mountPath: /usr/src/go-do
+                  readOnly: true
+          imagePullSecrets:
+            - name: regcred
+          volumes:
+            - name: bckp
+              secret:
+                secretName: ${SECRET_NAME}

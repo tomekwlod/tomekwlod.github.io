@@ -1,0 +1,28 @@
+#remove this line with envrender.sh --rmfirst parameter
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${PROJECT_NAME_GENERATED}-testjob
+  namespace: ${NAMESPACE}
+spec:
+  # https://cloud.google.com/kubernetes-engine/docs/how-to/jobs
+  backoffLimit: 0 # https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#pod-backoff-failure-policy
+  template:
+    spec:
+      restartPolicy: Never # https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#job-termination-and-cleanup
+      containers:
+        - name: godojobbackup
+          image: "$DOCKER_REGISTRY/$PROJECT_NAME_GENERATED:$TAG" # docker run -p 8082:80 docker-registry.phaseiilabs.com/tapp:0.0.12
+          command:
+            - /bin/bash
+            - $COMMAND_TO_RUN
+          volumeMounts:
+            - name: bckp
+              mountPath: /usr/src/go-do
+              readOnly: true
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: bckp
+          secret:
+            secretName: ${SECRET_NAME}

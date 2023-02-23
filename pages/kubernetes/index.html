@@ -194,7 +194,7 @@
             # to get only renewal time (can be run in a loop maybe?):
             kubectl get certificate -o=jsonpath='{.items[].status.renewalTime}'
           </script>
-          
+
           <h2>Secrets</h2>
           <script type="editor" data-lang="sh">
             # will create, but fired second time will fail

@@ -1,0 +1,20 @@
+# Use postgres/example user/password credentials
+version: "3.1"
+
+services:
+  postgres:
+    container_name: postgresbackup
+    image: postgres:15
+    restart: always
+    volumes:
+      - ./backups:/backups
+      - ./ca-certificate.crt:/root/.postgresql/root.crt
+      # - ./ca-certificate.crt:/root/.postgresql/postgresql.crt
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres

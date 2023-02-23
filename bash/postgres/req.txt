@@ -1,0 +1,11 @@
+# db owner (this is needed for the copy functionality; remember that in order to eg. drop db you cannot connect to id but to some other database)
+DATABASE_OWNER_NAME=defaultdb
+DATABASE_OWNER_USERNAME=user
+DATABASE_OWNER_PASSWORD=pass
+# db
+DATABASE_HOST=host
+DATABASE_PORT=5432
+DATABASE_USERNAME=user
+DATABASE_PASSWORD=pass
+DATABASE_NAME=dbname
+DATABASE_SSL=require
