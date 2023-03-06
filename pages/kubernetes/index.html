@@ -47,6 +47,20 @@
           <br />
           <h2>Cheat Sheet</h2>
           <a href="Kubernetes-Cheat-Sheet_07182019.pdf">Kubernetes-Cheat-Sheet_07182019.pdf</a>
+          <h2>Kubectl install/update</h2>
+          <p>Update it's pretty much the same as installation:</p>
+          <script type="editor" data-lang="sh">
+            # if UPDATING, move the old kubectl for the sake of backup:
+            mv /usr/local/bin/kubectl /usr/local/bin/__old__kubectl
+            # download the latest version:
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            # make the bin executable:
+            chmod +x kubectl
+            # move the executable to the PATH location, eg:
+            sudo mv kubectl /usr/local/bin/
+            # check the version:
+            kubectl version --client
+          </script>
           <h2>Kubernetes handy commands</h2>
           <script type="editor" data-lang="sh">
 
