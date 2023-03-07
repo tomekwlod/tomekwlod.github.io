@@ -457,35 +457,35 @@
           </script>
           <h2>About Disaster Recovery</h2>
           <a href="https://www.druva.com/blog/understanding-rpo-and-rto/">https://www.druva.com/blog/understanding-rpo-and-rto/</a>
-          <h2>Minikube</h2>
-          <a href="https://minikube.sigs.k8s.io/docs/start/">Installation</a>
+          <h2>Bitnami Sealed Secrets / Kubeseal</h2>
+          <a href="https://www.youtube.com/watch?v=xd2QoV6GJlc">Video1</a>
+          <a href="https://www.youtube.com/watch?v=u0qtgUMLua0">Video2</a>
+          <a href="https://www.youtube.com/watch?v=ShGHCpUMdOg">Video3</a>
+          <p>Concept:</p>
+          <ul>
+            <li>- create a secret locally</li>
+            <li>- use Sealed Secret to encrypt it</li>
+            <li>- save it to repo</li>
+            <li>- now your CD tool (like Argo of Flux) apply it to a cluster (keep in mind that CI is for building,testing,pushing image, and that's it)</li>
+            <li>- secret is now stored in as a decrypted secret (also SealedSecret will be stored as a reference)</li>
+          </ul>
           <script type="editor" data-lang="sh">
 
-            minikube start
-
-            minikube dashboard
-
-            minikube kubectl -- get po -A
-
-            eval $(minikube docker-env)
-            # and then docker build - it will build image in the docker in minikube
-            # then you can use kubectl apply and use regular names of images available locally in minikube docker
-
-            # To go back to using your computer’s own Docker daemon
-            eval $(minikube docker-env -u)
-
-            minikube kubectl -- get po -A
-
-            kubectl get po -A
-
-            # tricks
-            # https://levelup.gitconnected.com/minikube-tips-tricks-739f4b00ac17
-
-            # export service to the host
-            minikube service service-name
           </script>
-          <h2>Minikube alternatives</h2>
-          <a href="https://kind.sigs.k8s.io/docs/user/loadbalancer/">Kind</a>
+
+          <h2>Argo CD (and sealed secrets)</h2>
+          <p>
+            links:
+            <ul>
+              <li>https://levelup.gitconnected.com/from-local-development-to-kubernetes-cluster-helm-https-ci-cd-gitops-kustomize-argocd-5d9de6f5364c - argo, sealed secrets, kustomize, helm</li>
+              <li>https://www.youtube.com/watch?v=7tEc23-BS9I - argo,bitnami sealed secrets</li>
+              <li>https://piotrminkowski.com/2022/12/14/sealed-secrets-on-kubernetes-with-argocd-and-terraform/ - argo,bitnami sealed secrets,terraform</li>
+              <li>https://igboie.medium.com/kubernetes-ci-cd-with-github-github-actions-and-argo-cd-36b88b6bda64 - argo,github actions,kuber</li>
+              <li>https://circleci.com/blog/deploy-to-kubernetes-with-argocd/ - argo,azure,nodeapp,circleci</li>
+              <li>https://levelup.gitconnected.com/gitops-ci-cd-using-github-actions-and-argocd-on-kubernetes-909d85d37746 - github actions, helm chart repo</li>
+            </ul>
+          </p>
+
         </div>
       </div>
     </div>
