@@ -70,6 +70,13 @@
             kubectl get svc,pod,deploy,job,ingress,secret --show-labels -n namespace
             kubectl get pv,pvc,rc,rs,svc,pod,deploy,job,ingress,secret  --show-labels -n namespace
 
+            # a use of custom columns:
+            kubectl get ing -A -o custom-columns="Host:spec.rules[0].host,Namespace:metadata.namespace"
+            or 
+            kubectl get deploy -o custom-columns="Name:metadata.name,Memory:spec.template.spec.containers[0].resources.limits.memory"
+            # to simply know what you can get, get a resource with `-o yaml` flag, eg:
+            kubectl get <resource> <podname> -o yaml
+
             # delete everything from namespace
             kubectl delete namespace nameofnamespace
             kubectl create namespace nameofnamespace
@@ -457,6 +464,7 @@
           </script>
           <h2>About Disaster Recovery</h2>
           <a href="https://www.druva.com/blog/understanding-rpo-and-rto/">https://www.druva.com/blog/understanding-rpo-and-rto/</a>
+          
           <h2>Bitnami Sealed Secrets / Kubeseal</h2>
           <a href="https://www.youtube.com/watch?v=xd2QoV6GJlc">Video1</a>
           <a href="https://www.youtube.com/watch?v=u0qtgUMLua0">Video2</a>
@@ -465,9 +473,9 @@
           <ul>
             <li>- create a secret locally</li>
             <li>- use Sealed Secret to encrypt it</li>
-            <li>- save it to repo</li>
+            <li>- save it to repo (normally it should be a separate gitops repo)</li>
             <li>- now your CD tool (like Argo of Flux) apply it to a cluster (keep in mind that CI is for building,testing,pushing image, and that's it)</li>
-            <li>- secret is now stored in as a decrypted secret (also SealedSecret will be stored as a reference)</li>
+            <li>- secret is now stored in as a decrypted secret (also SealedSecret will be stored for a reference)</li>
           </ul>
           <script type="editor" data-lang="sh">
 
@@ -479,10 +487,19 @@
             <ul>
               <li>https://levelup.gitconnected.com/from-local-development-to-kubernetes-cluster-helm-https-ci-cd-gitops-kustomize-argocd-5d9de6f5364c - argo, sealed secrets, kustomize, helm</li>
               <li>https://www.youtube.com/watch?v=7tEc23-BS9I - argo,bitnami sealed secrets</li>
+              <li>https://www.youtube.com/watch?v=vpWQeoaiRM4 - argo</li>
               <li>https://piotrminkowski.com/2022/12/14/sealed-secrets-on-kubernetes-with-argocd-and-terraform/ - argo,bitnami sealed secrets,terraform</li>
               <li>https://igboie.medium.com/kubernetes-ci-cd-with-github-github-actions-and-argo-cd-36b88b6bda64 - argo,github actions,kuber</li>
               <li>https://circleci.com/blog/deploy-to-kubernetes-with-argocd/ - argo,azure,nodeapp,circleci</li>
               <li>https://levelup.gitconnected.com/gitops-ci-cd-using-github-actions-and-argocd-on-kubernetes-909d85d37746 - github actions, helm chart repo</li>
+            </ul>
+          </p>
+
+          <h2>Helm secrets</h2>
+          <p>
+            links:
+            <ul>
+              <li>https://www.thorsten-hans.com/encrypted-secrets-in-helm-charts/ - azure, sops</li>
             </ul>
           </p>
 
