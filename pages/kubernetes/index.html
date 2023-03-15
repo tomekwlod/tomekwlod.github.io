@@ -72,8 +72,10 @@
 
             # a use of custom columns:
             kubectl get ing -A -o custom-columns="Host:spec.rules[0].host,Namespace:metadata.namespace"
-            or 
+            or
             kubectl get deploy -o custom-columns="Name:metadata.name,Memory:spec.template.spec.containers[0].resources.limits.memory"
+            or
+            kubectl get cronjob -A -o custom-columns="Name:metadata.name,Spec:spec.schedule,Namespace:metadata.namespace"
             # to simply know what you can get, get a resource with `-o yaml` flag, eg:
             kubectl get <resource> <podname> -o yaml
 
@@ -464,7 +466,7 @@
           </script>
           <h2>About Disaster Recovery</h2>
           <a href="https://www.druva.com/blog/understanding-rpo-and-rto/">https://www.druva.com/blog/understanding-rpo-and-rto/</a>
-          
+
           <h2>Bitnami Sealed Secrets / Kubeseal</h2>
           <a href="https://www.youtube.com/watch?v=xd2QoV6GJlc">Video1</a>
           <a href="https://www.youtube.com/watch?v=u0qtgUMLua0">Video2</a>
@@ -477,32 +479,81 @@
             <li>- now your CD tool (like Argo of Flux) apply it to a cluster (keep in mind that CI is for building,testing,pushing image, and that's it)</li>
             <li>- secret is now stored in as a decrypted secret (also SealedSecret will be stored for a reference)</li>
           </ul>
+          <p>Installation:</p>
           <script type="editor" data-lang="sh">
+            #Let's add a new repo to our helm:
+            helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
 
+            #We can now see the version:
+            helm search repo sealed
+
+            #Install the sealed secrets controller (and create a cert)
+            helm install sealed-secrets sealed-secrets/sealed-secrets -n kube-system
+
+            #Now we have to edit the sealed-secrets controller and change the renew policy (basically turn it off: https://youtu.be/u0qtgUMLua0?t=1209):
+            kubectl edit deployment/sealed-secrets -n kube-system
+            #add the renew flag:
+            ```
+            spec:
+              ...
+              template:
+                ...
+                spec:
+                  ...
+                    containers:
+                      ...
+                      command:
+                      - controller
+                      #########
+                      - --key-renew-period=0
+                      #########
+                      ...
+            ```
+            #save and close the editor
+
+            #Install kubeseal locally. Kubeseal is used to encode the secrets from a local machine.
+            https://github.com/bitnami-labs/sealed-secrets#homebrew
+          </script>
+
+          <p>Usage (using basic auth as an example):</p>
+          <script type="editor" data-lang="sh">
+            # generate the 'auth' file containing the username and password (it will prompt for password)
+            htpasswd -c auth username
+
+            # this will create a local secret.yaml file (it's a dry-run so the secret will not go to tghe cluster)
+            kubectl create secret generic basicauthsecret --dry-run=client --from-file=auth -o yaml > secret.yaml
+
+            # let's seal the secret and create a local yaml file
+            kubeseal \
+              --controller-name=sealed-secrets \
+              --controller-namespace=kube-system \
+              --scope cluster-wide \
+              --format yaml < secret.yaml > sealed-secret.yaml
+
+            # finally let's push the secret to the cluster
+            kubectl apply -f sealed-secret.yaml
+
+            kubectl get secret basicauthsecret
+            kubectl describe secret basicauthsecret
           </script>
 
           <h2>Argo CD (and sealed secrets)</h2>
-          <p>
-            links:
-            <ul>
-              <li>https://levelup.gitconnected.com/from-local-development-to-kubernetes-cluster-helm-https-ci-cd-gitops-kustomize-argocd-5d9de6f5364c - argo, sealed secrets, kustomize, helm</li>
-              <li>https://www.youtube.com/watch?v=7tEc23-BS9I - argo,bitnami sealed secrets</li>
-              <li>https://www.youtube.com/watch?v=vpWQeoaiRM4 - argo</li>
-              <li>https://piotrminkowski.com/2022/12/14/sealed-secrets-on-kubernetes-with-argocd-and-terraform/ - argo,bitnami sealed secrets,terraform</li>
-              <li>https://igboie.medium.com/kubernetes-ci-cd-with-github-github-actions-and-argo-cd-36b88b6bda64 - argo,github actions,kuber</li>
-              <li>https://circleci.com/blog/deploy-to-kubernetes-with-argocd/ - argo,azure,nodeapp,circleci</li>
-              <li>https://levelup.gitconnected.com/gitops-ci-cd-using-github-actions-and-argocd-on-kubernetes-909d85d37746 - github actions, helm chart repo</li>
-            </ul>
-          </p>
+          <p>links:</p>
+          <ul>
+            <li>https://levelup.gitconnected.com/from-local-development-to-kubernetes-cluster-helm-https-ci-cd-gitops-kustomize-argocd-5d9de6f5364c - argo, sealed secrets, kustomize, helm</li>
+            <li>https://www.youtube.com/watch?v=7tEc23-BS9I - argo,bitnami sealed secrets</li>
+            <li>https://www.youtube.com/watch?v=vpWQeoaiRM4 - argo</li>
+            <li>https://piotrminkowski.com/2022/12/14/sealed-secrets-on-kubernetes-with-argocd-and-terraform/ - argo,bitnami sealed secrets,terraform</li>
+            <li>https://igboie.medium.com/kubernetes-ci-cd-with-github-github-actions-and-argo-cd-36b88b6bda64 - argo,github actions,kuber</li>
+            <li>https://circleci.com/blog/deploy-to-kubernetes-with-argocd/ - argo,azure,nodeapp,circleci</li>
+            <li>https://levelup.gitconnected.com/gitops-ci-cd-using-github-actions-and-argocd-on-kubernetes-909d85d37746 - github actions, helm chart repo</li>
+          </ul>
 
           <h2>Helm secrets</h2>
-          <p>
-            links:
-            <ul>
-              <li>https://www.thorsten-hans.com/encrypted-secrets-in-helm-charts/ - azure, sops</li>
-            </ul>
-          </p>
-
+          <p>links:</p>
+          <ul>
+            <li>https://www.thorsten-hans.com/encrypted-secrets-in-helm-charts/ - azure, sops</li>
+          </ul>
         </div>
       </div>
     </div>
