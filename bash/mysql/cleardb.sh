@@ -3,12 +3,12 @@ function help {
 
 cat << EOF
 
-  /bin/bash ${0} --force
+  /bin/bash $0 --force
   # executing this script without --force parameter will only print credentials to connect to database
   # to ensure that you will execute it no right database
 
-  /bin/bash ${0} --force .env.kub.prod
-  /bin/bash ${0} .env.kub.prod --force
+  /bin/bash $0 --force .env.kub.prod
+  /bin/bash $0 .env.kub.prod --force
 
   Might be necessary running:
       (cd bash && echo "{}" > package.json && yarn add dotenv-up)
@@ -16,7 +16,7 @@ cat << EOF
 EOF
 }
 
-if [ "${1}" = "--help" ]; then
+if [ "$1" = "--help" ]; then
 
     help
 
@@ -26,55 +26,61 @@ fi
 FILE=".env"
 
 FORCE="0"
-while (( "${#}" )); do
-  case "${1}" in
+while (( "$#" )); do
+  case "$1" in
     --force)
       FORCE="1";
       shift;
       ;;
     -*|--*=) # unsupported flags
-      echo "${0} error: Unsupported flag ${1}" >&2
+      echo "$0 Error: Unsupported flag $1" >&2
       exit 1;
       ;;
     *) # preserve positional arguments
-      FILE="${1}"
+      FILE="$1"
       shift;
       ;;
   esac
 done
 
-if [ "${FILE}" = "" ]; then
+if [ "$FILE" = "" ]; then
 
     FILE=".env"
 fi
 
 _DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 
-source "${_DIR}/../colours.sh";
+source "$_DIR/../colours.sh";
 
-if [ "${FILE}" != "" ]; then
+if [ "$FILE" != "" ]; then
 
-    if [ ! -f "${FILE}" ]; then
+    if [ ! -f "$FILE" ]; then
 
-        { red "FILE \${1}: '${FILE}' doesn't exist"; } 2>&3
+        { red "FILE \$1: '$FILE' doesn't exist"; } 2>&3
 
         help
 
         exit 1;
     fi
 
-    FILE="$(basename "${FILE}")"
+    FILE="$(basename "$FILE")"
 fi
 
 set -x
 
-HOST="$(node "${_DIR}/../node/env/getter.js" PROTECTED_MYSQL_HOST --env-file "${FILE}")"
-USER="$(node "${_DIR}/../node/env/getter.js" PROTECTED_MYSQL_USER --env-file "${FILE}")"
-PORT="$(node "${_DIR}/../node/env/getter.js" PROTECTED_MYSQL_PORT --env-file "${FILE}")"
-PASS="$(node "${_DIR}/../node/env/getter.js" PROTECTED_MYSQL_PASS --env-file "${FILE}")"
-DB="$(node "${_DIR}/../node/env/getter.js" PROTECTED_MYSQL_DB --env-file "${FILE}")"
+HOST="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_HOST --env-file "$FILE")"
+USER="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_USER --env-file "$FILE")"
+PORT="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_PORT --env-file "$FILE")"
+PASS="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_PASS --env-file "$FILE")"
+DB="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_DB --env-file "$FILE")"
 
-PASS="$(echo "${PASS}" | sed -E 's# #\\ #g')"
+PASS="$(echo "$PASS" | sed -E 's# #\\ #g')"
+
+if [ "$HOST" = "localhost" ] || [ "$HOST" = "127.0.0.1" ] || [ "$HOST" = "0.0.0.0" ]; then
+  # docker locally?
+  # TODO: temporary only!
+  HOST="host.docker.internal"
+fi
 
 set +x
 
@@ -82,45 +88,40 @@ set +x
 
 TARGET:
 
-  HOST  "${HOST}"
-  USER  "${USER}"
-  PORT  "${PORT}"
-  PASS  "${PASS}"
-  DB    "${DB}"
+  HOST  "$HOST"
+  USER  "$USER"
+  PORT  "$PORT"
+  PASS  "$PASS"
+  DB    "$DB"
 
 "; } 2>&3
 
-if [ "${DB}" = "" ]; then
+if [ "$DB" = "" ]; then
 
-    { red "${0} error: Environment variable PROTECTED_MYSQL_DB is empty or not defined in ${FILE}"; } 2>&3
-
-    help
-
-    exit 1;
-fi
-
-if [ "${FORCE}" = "0" ]; then
-
-    { red "\n${0} error: add --force parameter to execute it for real\n"; } 2>&3
+    { red "$0 error: Environment variable PROTECTED_MYSQL_DB is empty or not defined in $FILE"; } 2>&3
 
     help
 
     exit 1;
 fi
 
-CHECK="mysql -h ${HOST} -u ${USER} -P${PORT} -p${PASS} \"${DB}\" -e \"show tables\""
+if [ "$FORCE" = "0" ]; then
 
+    { red "\n$0 error: add --force parameter to execute it for real\n"; } 2>&3
+
+    help
+
+    exit 1;
+fi
+
+CHECK="docker exec -i mysqlbackup /bin/bash -c \"mysql -h $HOST -u $USER -P$PORT -p$PASS \"$DB\" -e \"show tables\"\"";
 function tables {
-
-#    echo -e "\n\n${CHECK}\n\n"
-
-    RESULT="$(eval ${CHECK} 2>> /dev/null)"
-
-    echo ${RESULT};
+    RESULT="$(eval $CHECK 2>> /dev/null)"
+    echo $RESULT;
 }
 
 CLEAR=$(cat <<END
-SET @schema = '${DB}';
+SET @schema = '$DB';
 SET @pattern = '%';
 SET SESSION group_concat_max_len = 1000000;
 SELECT CONCAT('DROP TABLE ',GROUP_CONCAT(CONCAT('\\\`',@schema,'\\\`.\\\`',table_name,'\\\`')),';')
@@ -137,45 +138,35 @@ DEALLOCATE PREPARE stmt;
 END
 );
 
-CLEAR="mysql -h ${HOST} -u ${USER} -P${PORT} -p${PASS} \"${DB}\" -e \"${CLEAR}\""
+CHECK="docker exec -i mysqlbackup /bin/bash -c \"mysql -h $HOST -u $USER -P$PORT -p$PASS \"$DB\" -e \"$CLEAR\"\"";
 
 ATTEMPTS="10";
-
-{ green "\n${ATTEMPTS} attempts to remove existing tables before importing"; } 2>&3
+echo -e "\n$ATTEMPTS attempts to remove existing tables before importing";
 
 N="1"
 ERROR="";
 while true
 do
-
     TABLES="$(tables)"
 
-    if [ "${TABLES}" = "" ]; then
-
+    if [ "$TABLES" = "" ]; then
         break;
     else
-
-        { green "${N} attempt:"; } 2>&3
-
-        RESULT="$(eval ${CLEAR} 2>> /dev/null)"
+        echo "$N attempt:";
+        RESULT="$(eval $CLEAR 2>> /dev/null)"
     fi
 
-    N=$((${N} + 1));
+    N=$(($N + 1));
 
-    if [ ${N} -gt ${ATTEMPTS} ]; then
-
-        ERROR="Database ${DB} still have tables: ${TABLES}";
-
+    if [ $N -gt $ATTEMPTS ]; then
+        ERROR="Database $DB still have tables: $TABLES";
         break;
     fi
 done
 
-if [ "${ERROR}" != "" ]; then
-
-    { red "\n${0} error: ${ERROR}\n"; } 2>&3
-
+if [ "$ERROR" != "" ]; then
+    echo "\n$0 error: $ERROR\n";
     exit 1;
 fi
 
-{ green "\nSeems clear\n"; } 2>&3
-
+echo -e "\nSeems clear\n";

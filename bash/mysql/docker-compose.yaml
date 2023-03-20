@@ -1,0 +1,12 @@
+version: "3.1"
+
+services:
+  mysql:
+    container_name: mysqlbackup
+    image: mysql:8
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./backups:/backups
+    environment:
+      MYSQL_ROOT_PASSWORD: password

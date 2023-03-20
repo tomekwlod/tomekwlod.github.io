@@ -1,15 +1,14 @@
 
 function help {
-  
+
 cat << EOF
 
-  /bin/bash $0 path/to/mysql.sql
-  # /bin/bash $0 path/to/mysql.sql.tar.gz - not implemented yet
+  /bin/bash $0 --force
+  # executing this script without --force parameter will only print credentials to connect to database
+  # to ensure that you will execute it no right database
 
-  # it is usually good idea to run before import
-  (cd migrations && node recreate-db.js)
-
-  /bin/bash $0 path/to/mysql.sql .env.kub.prod - !!! be careful
+  /bin/bash $0 --force .env.kub.prod
+  /bin/bash $0 .env.kub.prod --force
 
   Might be necessary running:
       (cd bash && echo "{}" > package.json && yarn add dotenv-up)
@@ -24,27 +23,49 @@ if [ "$1" = "--help" ]; then
     exit 0
 fi
 
+FILE=".env"
+
+FORCE="0"
+while (( "$#" )); do
+  case "$1" in
+    --force)
+      FORCE="1";
+      shift;
+      ;;
+    -*|--*=) # unsupported flags
+      echo "$0 Error: Unsupported flag $1" >&2
+      exit 1;
+      ;;
+    *) # preserve positional arguments
+      FILE="$1"
+      shift;
+      ;;
+  esac
+done
+
+if [ "$FILE" = "" ]; then
+
+    FILE=".env"
+fi
+
 _DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 
 source "$_DIR/../colours.sh";
 
-FILE=".env"
+if [ "$FILE" != "" ]; then
 
-if [ "$2" != "" ]; then
+    if [ ! -f "$FILE" ]; then
 
-    if [ ! -f "$2" ]; then
-
-        { red "FILE \$2: '$2' doesn't exist"; } 2>&3
+        { red "FILE \$1: '$FILE' doesn't exist"; } 2>&3
 
         help
 
         exit 1;
     fi
 
-    FILE="$(basename "$2")"
+    FILE="$(basename "$FILE")"
 fi
 
-set -e
 set -x
 
 HOST="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_HOST --env-file "$FILE")"
@@ -55,10 +76,11 @@ DB="$(node "$_DIR/../node/env/getter.js" PROTECTED_MYSQL_DB --env-file "$FILE")"
 
 PASS="$(echo "$PASS" | sed -E 's# #\\ #g')"
 
-set +e
 set +x
 
-cat << EOF
+{ yellow "
+
+TARGET:
 
   HOST  "$HOST"
   USER  "$USER"
@@ -66,15 +88,24 @@ cat << EOF
   PASS  "$PASS"
   DB    "$DB"
 
-EOF
+"; } 2>&3
 
-if [ ! -e "$1" ]; then
+if [ "$DB" = "" ]; then
 
-  { red "FILE: '$1' doesn't exist"; } 2>&3
+    { red "$0 error: Environment variable PROTECTED_MYSQL_DB is empty or not defined in $FILE"; } 2>&3
 
-  help
+    help
 
-  exit 1
+    exit 1;
+fi
+
+if [ "$FORCE" = "0" ]; then
+
+    { red "\n$0 error: add --force parameter to execute it for real\n"; } 2>&3
+
+    help
+
+    exit 1;
 fi
 
 CHECK="mysql -h $HOST -u $USER -P$PORT -p$PASS \"$DB\" -e \"show tables\""
@@ -91,6 +122,7 @@ function tables {
 CLEAR=$(cat <<END
 SET @schema = '$DB';
 SET @pattern = '%';
+SET SESSION group_concat_max_len = 1000000;
 SELECT CONCAT('DROP TABLE ',GROUP_CONCAT(CONCAT('\\\`',@schema,'\\\`.\\\`',table_name,'\\\`')),';')
 INTO @droplike
 FROM information_schema.TABLES
@@ -109,23 +141,21 @@ CLEAR="mysql -h $HOST -u $USER -P$PORT -p$PASS \"$DB\" -e \"$CLEAR\""
 
 ATTEMPTS="10";
 
-{ green "\n$ATTEMPTS attempts to remove existing tables before importing\n"; } 2>&3
+{ green "\n$ATTEMPTS attempts to remove existing tables before importing"; } 2>&3
 
 N="1"
 ERROR="";
 while true
 do
 
-    { green "$N attempt:"; } 2>&3
-
     TABLES="$(tables)"
 
     if [ "$TABLES" = "" ]; then
 
-        { green "seems clear..."; } 2>&3
-
         break;
     else
+
+        { green "$N attempt:"; } 2>&3
 
         RESULT="$(eval $CLEAR 2>> /dev/null)"
     fi
@@ -147,34 +177,5 @@ if [ "$ERROR" != "" ]; then
     exit 1;
 fi
 
-set +x
-set +e
-
-CMD="mysql -h $HOST -u $USER -P$PORT -p$PASS $DB"
-
-printf "\nimporting from file \"$1\"\n";
-
-RESULT="$($CMD < "$1" 2>&1)"
-
-CODE="$?"
-
-printf "\n$RESULT\n";
-
-if [ "$CODE" = "0" ]; then
-
-  { green "\nAll good, exit code: 0\n"; } 2>&3
-
-else
-
-  if [[ $RESULT = *"already exists"* ]]; then
-
-      { red "\n\nimport crashed and it looks like it might be necessary to clear the database and repeat import.\nIn order to clear database in Roderic project just run:\n\n    node migrations/recreate-db.js dangerous\n\nWARNING: make sure that you're working on correct database by running:\n\n    node migrations/recreate-db.js\n\nthis will just print database credentials without firing clearing database\n"; } 2>&3
-
-  else
-
-    { red "\n$0 general import error:\n\n$RESULT\n"; } 2>&3
-  fi
-fi
-
-exit $CODE;
+{ green "\nSeems clear\n"; } 2>&3
 
