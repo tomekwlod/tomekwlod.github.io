@@ -203,6 +203,15 @@
             exit ${STATUS}
           </script>
 
+          <h2>Other useful commands</h2>
+          <script type="editor" data-lang="sh">
+            # say you have a database that runs on a cluster and you want to make a quick backup of it's database:
+            # this will create a local backup file of your db
+            kubectl exec -ti <pod_name> -- mysqldump -u root -p<password> <db_name> > my.sql
+            
+            
+          </script>
+
           <h2>Kustomize</h2>
           <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/">https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/</a>
 

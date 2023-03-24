@@ -24,38 +24,38 @@ fi
 # more:
 #         kubectl create secret generic --help
 
-NAMESPACE=""
+NS=""
 
-if [ "${1}" = "-n" ]; then
+if [ "$1" = "-n" ]; then
 
-  NAMESPACE=" -n ${2}"
+  NS=" -n $2"
 
   shift;
 
   shift;
 fi
 
-if [ "${1}" = "" ]; then
+if [ "$1" = "" ]; then
 
     echo "name of secret is not given - first argument is not passed to the script"
 
     exit 1;
 fi
 
-    #SECRET="env-${PROJECT_NAME_SHORT}";  # !!!!!!!!!!!!!!!!!!!!!!!!!
+    #SECRET="env-$PROJECT_NAME_SHORT";  # !!!!!!!!!!!!!!!!!!!!!!!!!
 
-SECRET="${1}"
+SECRET="$1"
 
 shift;
 
-if [ "${1}" = "" ]; then
+if [ "$1" = "" ]; then
 
     echo "not even one file is given - second argument is not passed to the script"
 
     exit 1;
 fi
 
-if [ "$(( ${#} % 2 ))" != "0" ]; then
+if [ "$(( $# % 2 ))" != "0" ]; then
 
     echo "number of arguments should come in pairs - number of remaining arguments (except secret name) are not even"
 
@@ -66,9 +66,9 @@ _PWD="$(pwd)"
 
 _DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 
-if ! [ -w "${_DIR}" ]; then
+if ! [ -w "$_DIR" ]; then
 
-    echo "directory '${_DIR}' is not writtable"
+    echo "directory '$_DIR' is not writtable"
 
     exit 1;
 fi
@@ -84,15 +84,15 @@ function cleanup {
   for i in "${DELETE[@]}"
   do
 
-      echo -e "\nremoving '${i}'";
+      echo -e "\nremoving '$i'";
 
-      unlink "${i}" || true
+      unlink "$i" || true
   done
 }
 
 trap cleanup EXIT;
 
-# --from-file="${TMPFILE}"
+# --from-file="$TMPFILE"
 FROMFILE="";
 
 FIRST="1";
@@ -100,56 +100,56 @@ SOURCEFILE=""
 TARGETNAME=""
 while true; do
 
-    PARAM="${1}"
+    PARAM="$1"
 
     shift;
 
-    if [ "${FIRST}" = "1" ]; then
+    if [ "$FIRST" = "1" ]; then
 
-        SOURCEFILE="$(realpath -m "${PARAM}")"
+        SOURCEFILE="$(realpath -m "$PARAM")"
     else
 
-        if [ ! -e "${SOURCEFILE}" ]; then
+        if [ ! -e "$SOURCEFILE" ]; then
 
-            echo "${0} error: file: '${SOURCEFILE}' doesn't exist"
+            echo "$0 error: file: '$SOURCEFILE' doesn't exist"
 
             exit 1;
         fi
 
-        TARGETNAME="$(basename "${SOURCEFILE}")"
+        TARGETNAME="$(basename "$SOURCEFILE")"
 
-        if [ "${TARGETNAME}" != "${PARAM}" ]; then
+        if [ "$TARGETNAME" != "$PARAM" ]; then
 
-            TMPFILE="${_DIR}/${PARAM}"
+            TMPFILE="$_DIR/$PARAM"
 
-            if [ -e "${TMPFILE}" ]; then
+            if [ -e "$TMPFILE" ]; then
 
-                echo "${0} error: can't create file: '${TMPFILE}' it already exist"
+                echo "$0 error: can't create file: '$TMPFILE' it already exist"
 
                 exit 1;
             fi
 
-            cp "${SOURCEFILE}" "${TMPFILE}"
+            cp "$SOURCEFILE" "$TMPFILE"
 
-            DELETE+=("${TMPFILE}");
+            DELETE+=("$TMPFILE");
 
-            SOURCEFILE="${TMPFILE}"
+            SOURCEFILE="$TMPFILE"
         fi
 
-        if [ "${FROMFILE}" != "" ]; then
+        if [ "$FROMFILE" != "" ]; then
 
-            FROMFILE="${FROMFILE} ";
+            FROMFILE="$FROMFILE ";
         fi
 
-        FROMFILE="${FROMFILE}--from-file=\"${SOURCEFILE}\"";
+        FROMFILE="$FROMFILE--from-file=\"$SOURCEFILE\"";
     fi
 
-    if [ "${#}" = "0" ]; then
+    if [ "$#" = "0" ]; then
 
         break;
     fi
 
-    if [ "${FIRST}" = "0" ]; then
+    if [ "$FIRST" = "0" ]; then
         FIRST="1";
     else
         FIRST="0";
@@ -161,11 +161,11 @@ set -e
 set -x
 
 # https://stackoverflow.com/a/45881259
-kubectl create secret generic "${SECRET}" ${FROMFILE}${NAMESPACE} --dry-run -o yaml | kubectl apply -f -
+kubectl create secret generic "$SECRET" $FROMFILE$NS --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl get secrets
+kubectl get secrets$NS
 
-kubectl describe secret "${SECRET}"
+kubectl describe secret $SECRET$NS
 
 set +x
 
