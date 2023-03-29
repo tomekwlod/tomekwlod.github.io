@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>tomekwlod.github.io</title>
+  </head>
+  <body class="layout" toc>
+    <div class="body">
+      <div class="inside">
+        <div class="cards">
+          <h2>Cherry pick from other repo</h2>
+          <script type="editor" data-lang="bash">
+            # add new remote to your current repo (where <name_of_the_remote> can be anything)
+            git remote add <name_of_the_remote> git@github.com:other_repository.git
+
+            # fetch from the new remote
+            git fetch <name_of_the_remote>
+
+            # display the commits history from the new remote
+            git log <name_of_the_remote>/master
+
+            # now copy your hash of interest and cherry pick it
+            git cherry-pick -n <hash>
+            # where -n is for no-commit
+          </script>
+        </div>
+      </div>
+    </div>
+    <script src="/js/github.js"></script>
+  </body>
+</html>
