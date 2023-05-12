@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>tomekwlod.github.io</title>
+  </head>
+  <body class="layout" toc>
+    <div class="body">
+      <div class="inside">
+        <div class="cards">
+          <h2>Links</h2>
+          <ul>
+            <li>
+              <a target="_blank" href="https://www.linkedin.com/learning/learning-azure-kubernetes-service-aks-17453148/overview-of-aks-in-the-azure-portal?autoSkip=true&autoplay=true&resume=false">AKS Lynda.com - AKS overwiev, setup, conf, kubectl</a>
+            </li>
+            <li>
+              ArgoCD Azure GithubActions:
+              <br>
+              <a target="_blank" href="https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gitops-aks/gitops-blueprint-aks">Gitops overview</a>
+              <br>
+              <a target="_blank" href="https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/README.md#option-2-pull-based-cicd-architecture-and-dataflow">Pull based deployment</a>
+            </li>
+          </ul>
+          <br />
+          <h2>AKS setup</h2>
+          <p>
+            Create a cluster through the Azure Panel.
+          </p>
+          <p>
+            In order to interact with the cluster from the cli, we need to install Azure CLI tool. You can
+            follow <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos">this</a> tutorial. Basically on a mac it comes to executing these commands:
+            <br />
+            <i>brew update && brew install azure-cli</i>
+          </p>
+          <p>
+            Once we have the az tool, we have to login to the azure:
+            <br />
+            <i>az login</i>
+            <br />
+            (for CI we need a different way to login, see more <a href="https://github.com/marketplace/actions/azure-login" target="_blank">here</a>)
+          </p>
+          <p>
+            Once successfully logged in, go to the Kubernetes Services and select your cluster.
+            Then if you click on <i>Connect</i> button you will see how to connect to the cluster. Basically we have to run two commands:
+            <pre>
+              az account set --subscription [the-hash-here]
+              az aks get-credentials --resource-group [resource-group-name-here] --name [cluster-name-here]
+            </pre>
+          </p>
+          <script type="editor" data-lang="bash">
+          </script>
+        </div>
+      </div>
+    </div>
+    <script src="/js/github.js"></script>
+  </body>
+</html>
