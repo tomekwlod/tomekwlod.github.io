@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>tomekwlod.github.io</title>
+  </head>
+  <body class="layout" toc>
+    <div class="body">
+      <div class="inside">
+        <div class="cards">
+          <h2>ArgoCD</h2>
+          <h4><a target="_blank" href="https://argo-cd.readthedocs.io/en/stable/getting_started/">https://argo-cd.readthedocs.io/en/stable/getting_started/</a></h4>
+          <p>
+            <h3>Installation</h3>
+            Create a namespace and apply the installation manifest
+            <script type="editor" data-lang="bash">
+              kubectl create namespace argocd
+              kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+            </script>
+          </p>
+          <p>
+            <h3>Password</h3>
+            We have to now retrieve the initial password (wait for the previous command to finish, it usually takes about 30sec):
+            <script type="editor" data-lang="bash">
+              kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+              #### or
+              kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o name | cut -d'/' -f 2
+            </script>
+          </p>
+          <p>
+            <h3>Port forward</h3>
+            Let's port-forward for now to see if the instance is up and runnin
+            <script type="editor" data-lang="bash">
+              kubectl port-forward -n argocd svc/argocd-server 3000:443
+            </script>
+            You should be able to see the ArgoCD UI under port 3000. You can use the initial password alongside <i>admin</i> username to login.
+          </p>
+          <p>
+            <h3>Ingress</h3>
+            An ingress manifest may look similar to the below. <b>Keep in mind that in order for the below to work we have to have <i>--enable-ssl-passthrough</i> option enabled in the nginx-ingress Deployment manifest!</b>
+            <script type="editor" data-lang="yaml">
+              # taken from here but midified a little:
+              # https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#ssl-passthrough-with-cert-manager-and-lets-encrypt
+
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              metadata:
+                name: argocd-server-ingress
+                namespace: argocd
+                annotations:
+                  cert-manager.io/cluster-issuer: letsencrypt-prod
+                  kubernetes.io/tls-acme: "true"
+                  nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+                  # If you encounter a redirect loop or are getting a 307 response code
+                  # then you need to force the nginx ingress to connect to the backend using HTTPS.
+                  # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+              spec:
+                ingressClassName: nginx
+                rules:
+                - host: argocd.domain.com
+                  http:
+                    paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: argocd-server
+                          port:
+                            name: https
+                tls:
+                - hosts:
+                  - argocd.domain.com
+                  secretName: argocd-secret # do not change, this is provided by Argo CD
+
+            </script>
+            Now we can apply that manifest and test if we can reach the domain. If all is fine, it's a good moment to change the initial password.
+          </p>
+          <p>
+            <h3>App placeholder / Namespace</h3>
+            It's basically a good idea to group projects somehow. That's why AppProject resource type may be useful. Otherwise all projects of ours will land onto the default group.
+            The manifest may look like this:
+            <script type="editor" data-lang="yaml">
+              # Some useful comments:
+              # https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
+              apiVersion: argoproj.io/v1alpha1
+              kind: AppProject
+              metadata:
+                name: applications
+                namespace: argocd
+                # for now I deleted the below finalizer as it stops the namespace from being deleted!
+                # finalizers:
+                #   - resources-finalizer.argocd.argoproj.io
+              spec:
+                description: API demo project
+                sourceRepos:
+                - '*'
+                destinations:
+                - namespace: '*'
+                  server: '*'
+                clusterResourceWhitelist:
+                - group: '*'
+                  kind: '*'
+                namespaceResourceWhitelist:
+                - group: '*'
+                  kind: '*'
+            </script>
+          </p>
+          <p>
+            <h3>GitOps concept</h3>
+            In order to achieve the Pull-based CI/CD we need at least two repositories:
+            <ul>
+              <li><b>GitOps repo</b> - here we're going to be storing all the app manifests and update them (docker image tag for example) when we want to deploy a new version to cluster</li>
+              <li><b>Our APP_X repo</b> - a regular repo holding the APP_X code alongside the pipeline workflow (github, buildkite, etc), Dockerfile, etc</li>
+            </ul>
+            Now we have to tell ArgoCD where is the GitOps repo so it can connect to it and listen to the changes. Therefor we have to generate a new ssh key pair:
+            <script type="editor" data-lang="bash">
+              ssh-keygen -t rsa -f .argo
+              # now we have 2 files:
+              #  - argo
+              #  - argo.pub
+            </script>
+            and:
+            <ul>
+              <li>add private one to ArgoCD - Settings-Repositories-Connect Repo:
+                <ul>
+                  <li>
+                    ViaSSH
+                  </li>
+                  <li>
+                    name:gitops
+                  </li>
+                  <li>
+                    project:applications (Same as in AppProject manifest)
+                  </li>
+                  <li>
+                    resitoryUrl:your-ssh-url / paste Private Key
+                  </li>
+                  <li>
+                    paste Private Key
+                  </li>
+                </ul>
+              </li>
+              <li>add public one to GitOps repo - Github.com-repo-settings-Deploy keys
+                <ul>
+                  <li>
+                    Read-Only
+                  </li>
+                  <li>
+                    Name: argocd
+                  </li>
+                  <li>
+                    paste public key 
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </p>
+
+          <h3>Add an APP to ArgoCD</h3>
+          <p>
+            Once we have everything ready we can now add our App repo to ArgoCD so it can react on the changes. An example manifest is <a target="_blank" href="app1dev.yaml">here</a>.
+          </p>
+          <pre>
+            kubectl apply -f app1dev.yaml
+          </pre>
+
+          <h2>TODO: MULTI CLUSTERS</h2>
+        </div>
+      </div>
+    </div>
+    <script src="/js/github.js"></script>
+  </body>
+</html>

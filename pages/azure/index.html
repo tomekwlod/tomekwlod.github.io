@@ -49,8 +49,262 @@
               az aks get-credentials --resource-group [resource-group-name-here] --name [cluster-name-here]
             </pre>
           </p>
-          <script type="editor" data-lang="bash">
+
+          <h2>IngressNginx</h2>
+          <p>
+            Download the latest deploy.yaml file from: <a href="https://kubernetes.github.io/ingress-nginx/deploy/#azure">https://kubernetes.github.io/ingress-nginx/deploy/#azure</a>
+          </p>
+          <p>
+            Also take a look at the config for azure: <a href="https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli#create-an-ingress-controller">https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli#create-an-ingress-controller</a>
+          </p>
+          <p>
+            Make sure that externalTrafficPolicy flag is set to Local!
+          </p>
+          <p>
+            Also if we want to set, eg. - --enable-ssl-passthrough option we can do it now. Simply add this at the end of the arguments array:
+          </p>
+          <script type="editor" data-lang="yaml">
+            apiVersion: apps/v1
+            kind: Deployment
+            spec:
+              template:
+                spec:
+                  containers:
+                  - args:
+                    - /nginx-ingress-controller
+                    - --ingress-class=nginx
+                    - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+                    ........
+                    ############ 
+                    - --enable-ssl-passthrough
+                    ############
+                    ........
           </script>
+          <p>
+            Now we can run kubectl <i>apply -f ingress.yaml</i> and this will create a new namespace called <b>ingress-nginx</b> will all relevant resources.
+          </p>
+          <p>
+            To validate if everything is fine, let's run the below commands:
+            <script type="editor" data-lang="bash">
+              # this will print out the description
+              kubectl describe svc --namespace=ingress-nginx
+
+              # here we should be able to see the LB ip address - it may take a few minutes though
+              kubectl get svc -A
+            </script>
+          </p>
+
+          <h2>Sample app</h2>
+          <p>We need a sample app to test the setup. Let's use the nginx image, so the <b>app.yaml</b> manifest may look like:</p>
+          <script type="editor" data-lang="yaml">
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: sampleapp
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: sampleapp
+              namespace: sampleapp
+              labels:
+                app: sampleapp
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: sampleapp
+              template:
+                metadata:
+                  labels:
+                    app: sampleapp
+                spec:
+                  containers:
+                  - name: nginx
+                    image: nginx:1.14.2
+                    imagePullPolicy: IfNotPresent # If we have not pulled it before, get it from dockerhub
+                    ports:
+                      - containerPort: 80
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: sampleapp
+              namespace: sampleapp
+            spec:
+              ports:
+                - protocol: "TCP"
+                  targetPort: 80
+                  port: 80
+              selector:
+                app: sampleapp
+          </script>
+          <p>run <i>kubectl apply -f app.yaml</i> and you can forward the ports to see if all is as expected:</p>
+          <script type="editor" data-lang="bash">
+            kubectl port-forward <pod_name_here> 7000:80
+            kubectl port-forward service/<service_name_here> 7000:80
+          </script>
+
+          <h2>CertManager</h2>
+          <p>Install cert manager: <a href="https://cert-manager.io/docs/installation/kubectl/">https://cert-manager.io/docs/installation/kubectl/</a></p>
+          <p>Verify the installation: kubectl get pods --namespace cert-manager</p>
+          <p>Now we need the Issuers (prod and stage). Take a look how the issuers may look like: <a href="https://cert-manager.io/docs/configuration/acme/">https://cert-manager.io/docs/configuration/acme/</a></p>
+          <script type="editor" data-lang="yaml">
+            apiVersion: cert-manager.io/v1
+            kind: ClusterIssuer
+            metadata:
+              name: letsencrypt-prod
+            spec:
+              acme:
+                # The ACME server URL
+                server: https://acme-v02.api.letsencrypt.org/directory
+                # Email address used for ACME registration
+                email: email@domain.com
+                # Name of a secret used to store the ACME account private key
+                privateKeySecretRef:
+                  name: letsencrypt-prod
+                # Enable the HTTP-01 challenge provider
+                solvers:
+                  - http01:
+                      ingress:
+                        class: nginx
+          </script>
+          <p>Once we have the stage.yaml and/or prod.yaml issuers simply apply them.</p>
+
+          <p>It's time to apply for the certificates. Create an Issuer for your app, eg:</p>
+          <script type="editor" data-lang="yaml">
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: sampleapp-ingress
+              namespace: sampleapp
+              annotations:
+                nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+                cert-manager.io/cluster-issuer: "letsencrypt-prod"
+                nginx.ingress.kubernetes.io/proxy-body-size: "0"
+                nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+                nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+            spec:
+              ingressClassName: nginx
+              tls:
+                - hosts:
+                    - test.domain.com
+                    - www.test.domain.com
+                  secretName: sampleapp-stage-certbot-secret
+              rules:
+              - host: test.domain.com
+                http:
+                  paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: sampleapp
+                        port:
+                          number: 80
+          </script>
+          <p>NOTE! Before we can apply the above, we have to redirect the domain(s) to the LoadBalancer IP address</p>
+
+          <h2>Azure-GithubActions</h2>
+          <h3>Azure login preparation</h3>
+          <p>
+            We have to follow steps 1-5 to setup the appriopriate permissions: <a href="https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/app-flask-push-dockerbuild.md">https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/app-flask-push-dockerbuild.md</a>
+            <br />
+            The ghToAzAuth.sh variables may look like:<br />
+            <pre>
+              APPNAME=[PROJECT_NAME]
+              RG=[AKS resource group name, eg. rg]
+              GHORG=[your github user name]
+              GHREPO=[github repo name]
+              GHBRANCH=[git branch name, eg: master]
+              GHENV=[prod, stage, etc. This only matters if you use the github secrets]
+            </pre>
+            Execute the above script by running:
+            <script type="editor" data-lang="bash">
+              ##### jq needs to be installed, install it using brew install jq
+              /bin/bash ghToAzAuth.sh
+            </script>
+            This should give us all necessary values, such as: AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID
+          </p>
+          <p>
+            Now it will be possible to run a github action step:
+            <pre>
+              ...
+              jobs:
+                login-example:
+                  runs-on: ubuntu-latest
+                  environment: prod
+                  steps:                  
+                    ...
+                    - uses: azure/login@v1
+                      with:
+                        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                        enable-AzPSSession: true
+            </pre>
+          </p>
+
+          <h3>Azure Container Registry</h3>
+          <p>
+            Once we are logged in to Azure in github actions we can have a step similar to the following:
+            <script type="editor" data-lang="yaml">
+              ...
+              env:
+                ACRNAME: [the name of the acr resource, eg. johndoe]
+                APPNAME: [The Name of the Application to deploy, eg. strapi]
+              - name: Connect to Azure Container Registry (ACR)
+                id: acrconnect
+                run: |
+                  echo "Retrieving access token from ${{ env.ACRNAME}}"
+                  TOKEN=$(az acr login -n ${{ env.ACRNAME}} --expose-token)
+
+                  if [ -z "$TOKEN" ]
+                  then
+                    echo "ACR Token was not retrieved successfully"
+                    exit 1
+                  fi
+
+                  ACRTOKEN=$(echo $TOKEN | jq -r ".accessToken")
+                  LOGINSERVER=$(echo $TOKEN | jq -r ".loginServer")
+
+                  echo "ACR Login Server: $LOGINSERVER"
+                  echo "::set-output name=loginServer::$LOGINSERVER"
+
+                  echo "Passing token as stdin to docker login"
+                  echo $ACRTOKEN | docker login $LOGINSERVER -u 00000000-0000-0000-0000-000000000000 --password-stdin
+              - name: Build Docker image
+                run: |
+                  docker build -t ${{ env.ACRNAME }}.azurecr.io/${{ env.APPNAME }}:${{ github.run_number }} -f "pip/Dockerfile" .
+              - name: Push Docker image
+                run: |
+                  docker push ${{ env.ACRNAME }}.azurecr.io/${{ env.APPNAME }}:${{ github.run_number }}
+            </script>
+          </p>
+
+          <h3>Azure Container Registry Secret</h3>
+          <p>
+            In order for kuber to pull images from ACR we need to create a secret with the ACR credentials. Take a look at this file <a href="acr.sh" target="_blank">acr.sh</a>.
+            Before executing it you have to change <b>SERVICE_PRINCIPAL_NAME</b> and <b>ACR_NAME</b> values where SERVICE_PRINCIPAL_NAME has to be a unique name.
+            <pre>
+              /bin/bash acr.sh
+            </pre>
+            Copy those values as you won't be able to retrieve them anymore. As an output this script will give us the secrets needed for the below command.
+          </p>
+          <p>
+            Now we have to create a secret itself (<a href="https://learn.microsoft.com/en-us/azure/container-registry/container-registry-auth-kubernetes#create-a-service-principal" target="_blank">reference</a>):
+            <script type="editor" data-lang="bash">
+              kubectl create secret docker-registry regcred \
+                --namespace [namespace] \
+                --docker-server=[container-registry-name].azurecr.io \
+                --docker-username=[service-principal-ID] \
+                --docker-password=[service-principal-password]
+            </script>
+          </p>
+
+          <h2>TODO: WILDCARD DOMAINS</h2>
+          <h2>TODO: REFLECTOR</h2>
+          <h2>TODO: cluster.sh</h2>
         </div>
       </div>
     </div>

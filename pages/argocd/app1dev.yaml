@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # name of the deployed application to ArgoCD
+  name: app1dev
+  # do not cunfuse it with the app target ns; it should always be the default argocd namespace
+  namespace: argocd
+  finalizers:
+    # if you delete this app by running kubectl delete -f <this file> the argo app will be deleted but
+    # the real kuber app will still be running. In order to make it in sync we need a finalizer:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # For which project we are creating this app; this is just for grouping the apps
+  project: applications
+  source:
+    # Repo where the gitops repo exists
+    repoURL: git@github.com:tomekwlod/exp-gitops.git
+    # you can use branches, tags, or even primitive regex
+    targetRevision: master
+    # Path where the specific environment exists; path to track inside the github repo
+    path: apps/app1dev/overlays/dev
+  # Destination cluster and namespace to deploy the application
+  destination:
+    # The kubernetes cluster where Argo is installed
+    server: https://kubernetes.default.svc
+    # or cluster name
+    # name: in-cluster
+    # Namespace where to deploy the application
+    # The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+    namespace: app1dev
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+      allowEmpty: true # Allows deleting all application resources during automatic syncing ( false by default ).
+    syncOptions: # Sync options which modifies sync behavior
+      - Validate=false # disables resource validation (equivalent to 'kubectl apply --validate=false') ( true by default ).
+      - CreateNamespace=true # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.
+      - PrunePropagationPolicy=foreground # Supported policies are background, foreground and orphan.
+      - PruneLast=true # Allow the ability for resource pruning to happen as a final, implicit wave of a sync operation
+    # The retry feature is available since v1.7
+    retry:
+      limit: 5 # number of failed sync attempt retries; unlimited number of attempts if less than 0
+      backoff:
+        duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+        factor: 2 # a factor to multiply the base duration after each failed retry
+        maxDuration: 3m # the maximum amount of time allowed for the backoff strategy
