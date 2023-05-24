@@ -146,6 +146,18 @@
           </script>
 
           <h2>CertManager</h2>
+          <h4>BELOW SHOWS HOW TO INSTALL CERT-MANAGER USING KUBECTL. APPARENTLY IF WE INSTALL USING HELM IT WILL BE LATER EASIER TO UPDATE THE MANIFESTS, ESPECIALLY USEFUL WHEN IMPLEMENTING WILDCARD DOMAINS IN AZURE! SO I RECOMMEND TO IGNORE THE ABOVE AND INSTALL WITH HELM!</h4>
+          <H4>HELM INSTALLATION eg: </H4>
+          <pre>
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm upgrade cert-manager jetstack/cert-manager \
+  --install \
+  --create-namespace \
+  --wait \
+  --namespace cert-manager \
+  --set installCRDs=true
+          </pre>
           <p>Install cert manager: <a href="https://cert-manager.io/docs/installation/kubectl/">https://cert-manager.io/docs/installation/kubectl/</a></p>
           <p>Verify the installation: kubectl get pods --namespace cert-manager</p>
           <p>Now we need the Issuers (prod and stage). Take a look how the issuers may look like: <a href="https://cert-manager.io/docs/configuration/acme/">https://cert-manager.io/docs/configuration/acme/</a></p>
@@ -302,7 +314,91 @@
             </script>
           </p>
 
-          <h2>TODO: WILDCARD DOMAINS</h2>
+          <h2>Postgres, StatefulSet, Microsoft.Storage</h2>
+          <a href="https://stackoverflow.com/a/53870415" target="_blank">https://stackoverflow.com/a/53870415</a>
+          <p>
+            Basically the manifest (statefulset and service) may look similar to: 
+          </p>
+          <script type="editor" data-lang="yaml">
+            apiVersion: apps/v1
+            kind: StatefulSet
+            metadata:
+              name: postgresql
+            spec:
+              serviceName: postgresql
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: postgresql
+              template:
+                metadata:
+                  labels:
+                    app: postgresql
+                spec:
+                  containers:
+                    - name: postgresql
+                      image: postgres:latest
+                      ports:
+                        - containerPort: 5432
+                      env:
+                        - name: POSTGRES_USER
+                          value: pusername
+                        - name: POSTGRES_PASSWORD
+                          value: ppassword
+                        - name: POSTGRES_DB
+                          value: pdb
+                        - name: PGDATA
+                          value: /var/lib/pg_data
+                      volumeMounts:
+                        - name: postgresql-data
+                          mountPath: /var/lib/postgresql/data
+                          readOnly: false
+              volumeClaimTemplates:
+                - metadata:
+                    name: postgresql-data
+                  spec:
+                    accessModes: [ "ReadWriteOnce" ]
+                    storageClassName: azurefile
+                    resources:
+                      requests:
+                        storage: 2Gi
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: postgresql
+              labels:
+                app: postgresql
+            spec:
+              ports:
+                - port: 5432
+              selector:
+                app: postgresql
+
+          </script>
+          <p>
+            In terms of the storageClassName we have to fist check what the provider gives us. Let's run
+            <pre>
+kubectl get sc
+
+### output for azure:
+NAME                    PROVISIONER          RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+azurefile               file.csi.azure.com   Delete          Immediate              true                   9d
+azurefile-csi           file.csi.azure.com   Delete          Immediate              true                   9d
+azurefile-csi-premium   file.csi.azure.com   Delete          Immediate              true                   9d
+azurefile-premium       file.csi.azure.com   Delete          Immediate              true                   9d
+default (default)       disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
+managed                 disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
+managed-csi             disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
+managed-csi-premium     disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
+managed-premium         disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
+            </pre>
+            As you can see there are two types of the storage in azure (read more here: <a href="https://learn.microsoft.com/en-us/azure/aks/concepts-storage#azure-disk" target="_blank">https://learn.microsoft.com/en-us/azure/aks/concepts-storage#azure-disk</a>)
+            I tried the azurefile but due to the documentation, for the database purposes it's better to use the azuredisk intead, so `managed-csi` in particular. I am not sure though if that's correct...
+          </p>
+
+          <h2>WILDCARD DOMAINS - see the secrets repo!</h2>
+          <h2>TODO: CERT_MANAGER STAGE ACME</h2>
           <h2>TODO: REFLECTOR</h2>
           <h2>TODO: cluster.sh</h2>
         </div>
