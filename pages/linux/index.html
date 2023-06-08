@@ -10,7 +10,6 @@
     <div class="body">
       <div class="inside">
         <div class="cards">
-          
           <h2>Broken pipe issue</h2>
           <h3>we simply have to refresh the connection every X seconds on a MAC, like so:</h3>
           <script type="editor" data-lang="bash">
@@ -22,34 +21,34 @@
 
           <h2>New SSH user with no password entry</h2>
           <script type="editor" data-lang="bash">
-# (https://www.digitalocean.com/community/tutorials/how-to-create-a-sudo-user-on-centos-quickstart)
-- adduser twl
-#- passwd twl
-- usermod -aG wheel twl  <- to add out user to the sudoers (wheel is for centos)
-- verify: id twl
-- mkdir -p /home/twl/.ssh/
-# on a host machine, create a new ssh-key pair and copy the public one
-- ssh-keygen -t rsa
-# now paste that key to the below file:
-- vi /home/twl/.ssh/authorized_keys
-# now add some special permissions:
-- chown -R twl:twl /home/twl/.ssh 
-- chmod 700 /home/twl/.ssh 
- chmod 600 /home/twl/.ssh/authorized_keys
-NOTE: Be sure that the ssh key auth is enabled and the password is disabled:
-- vi /etc/ssh/sshd_config
-  PubkeyAuthentication yes
-  PasswordAuthentication no
-  ChallengeResponseAuthentication no
-- service sshd reload
+            # (https://www.digitalocean.com/community/tutorials/how-to-create-a-sudo-user-on-centos-quickstart)
+            - adduser twl
+            #- passwd twl
+            - usermod -aG wheel twl  <- to add out user to the sudoers (wheel is for centos)
+            - verify: id twl
+            - mkdir -p /home/twl/.ssh/
+            # on a host machine, create a new ssh-key pair and copy the public one
+            - ssh-keygen -t rsa
+            # now paste that key to the below file:
+            - vi /home/twl/.ssh/authorized_keys
+            # now add some special permissions:
+            - chown -R twl:twl /home/twl/.ssh
+            - chmod 700 /home/twl/.ssh
+             chmod 600 /home/twl/.ssh/authorized_keys
+            NOTE: Be sure that the ssh key auth is enabled and the password is disabled:
+            - vi /etc/ssh/sshd_config
+              PubkeyAuthentication yes
+              PasswordAuthentication no
+              ChallengeResponseAuthentication no
+            - service sshd reload
 
-#You can also disable the password for the user:
-#usermod --lock twl
-#usermod -a -G root twl
-
+            #You can also disable the password for the user:
+            #usermod --lock twl
+            #usermod -a -G root twl
           </script>
           <h2>Disable roor account</h2>
-          <h3>It's a good practice to add regular users to the system and disable the root access asap,
+          <h3>
+            It's a good practice to add regular users to the system and disable the root access asap,
             <a href="https://www.a2hosting.com/kb/getting-started-guide/accessing-your-account/disabling-ssh-logins-for-root/#Creating-a-normal-user-account">click here for more info</a>.
           </h3>
         </div>

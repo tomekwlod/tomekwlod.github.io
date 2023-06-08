@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>tomekwlod.github.io</title>
+  </head>
+  <body class="layout" toc>
+    <div class="body">
+      <div class="inside">
+        <div class="cards">
+          <h2>. code</h2>
+          <h3>Installation</h3>
+          <p>
+            Install the vscode and move it to the applications finder directory. Now open the Command Palette via ⌘⇧P and type "shell command" to find: "Shell Command: Install 'code' command via
+            PATH".
+            <br />Execute it.<br />Now you may need to restart the laptop for this to take the effect.
+            <script type="editor" data-lang="bash">
+              helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
+            </script>
+          </p>
+          <h3>Open vscode folder from a shortcut</h3>
+          <p>
+            Once we have 'code' added to PATH we can (see above) we can create a file in a directory of our choice, eg: "~/pro/". It's where we're going to keep the shortcuts.
+            <br />
+            The sample file may look like:
+            <script type="editor" data-lang="bash">
+              cd ~/work/my-project && code .
+            </script>
+            You can now drag that folder to the mac menu bar to have a quick access to the shortcuts.
+          </p>
+          <p>
+            Also, by default by clicking the project shortcut the terminal will open and stay opened. To avoid that open the Terminal->Preferences->Profiles->Shell and change the setting When the
+            shell exits: to Close if the shell exited cleanly
+          </p>
+
+          <h2>Shortcuts</h2>
+          <ul>
+            <li>cmd+shift+\ # toggle between closing and opening brackets</li>
+            <li>cmd+` # jump between open app windows</li>
+            <li>cmd+d # rename symbol</li>
+            <li>ctrl+- # go back/move forward (with shift)</li>
+            <li>cmd+enter # new line in the next line</li>
+            <li>Fn+F12 # go to definition, then</li>
+            <li>ctrl+- # to go back</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <script src="/js/github.js"></script>
+  </body>
+</html>

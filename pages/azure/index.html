@@ -13,24 +13,24 @@
           <h2>Links</h2>
           <ul>
             <li>
-              <a target="_blank" href="https://www.linkedin.com/learning/learning-azure-kubernetes-service-aks-17453148/overview-of-aks-in-the-azure-portal?autoSkip=true&autoplay=true&resume=false">AKS Lynda.com - AKS overwiev, setup, conf, kubectl</a>
+              <a target="_blank" href="https://www.linkedin.com/learning/learning-azure-kubernetes-service-aks-17453148/overview-of-aks-in-the-azure-portal?autoSkip=true&autoplay=true&resume=false"
+                >AKS Lynda.com - AKS overwiev, setup, conf, kubectl</a
+              >
             </li>
             <li>
               ArgoCD Azure GithubActions:
-              <br>
+              <br />
               <a target="_blank" href="https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gitops-aks/gitops-blueprint-aks">Gitops overview</a>
-              <br>
+              <br />
               <a target="_blank" href="https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/README.md#option-2-pull-based-cicd-architecture-and-dataflow">Pull based deployment</a>
             </li>
           </ul>
           <br />
           <h2>AKS setup</h2>
+          <p>Create a cluster through the Azure Panel.</p>
           <p>
-            Create a cluster through the Azure Panel.
-          </p>
-          <p>
-            In order to interact with the cluster from the cli, we need to install Azure CLI tool. You can
-            follow <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos">this</a> tutorial. Basically on a mac it comes to executing these commands:
+            In order to interact with the cluster from the cli, we need to install Azure CLI tool. You can follow
+            <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos">this</a> tutorial. Basically on a mac it comes to executing these commands:
             <br />
             <i>brew update && brew install azure-cli</i>
           </p>
@@ -42,27 +42,24 @@
             (for CI we need a different way to login, see more <a href="https://github.com/marketplace/actions/azure-login" target="_blank">here</a>)
           </p>
           <p>
-            Once successfully logged in, go to the Kubernetes Services and select your cluster.
-            Then if you click on <i>Connect</i> button you will see how to connect to the cluster. Basically we have to run two commands:
-            <pre>
-              az account set --subscription [the-hash-here]
-              az aks get-credentials --resource-group [resource-group-name-here] --name [cluster-name-here]
-            </pre>
+            Once successfully logged in, go to the Kubernetes Services and select your cluster. Then if you click on <i>Connect</i> button you will see how to connect to the cluster. Basically we have
+            to run two commands:
           </p>
+          <pre>
+            az account set --subscription [the-hash-here]
+            az aks get-credentials --resource-group [resource-group-name-here] --name [cluster-name-here]
+          </pre>
 
           <h2>IngressNginx</h2>
+          <p>Download the latest deploy.yaml file from: <a href="https://kubernetes.github.io/ingress-nginx/deploy/#azure">https://kubernetes.github.io/ingress-nginx/deploy/#azure</a></p>
           <p>
-            Download the latest deploy.yaml file from: <a href="https://kubernetes.github.io/ingress-nginx/deploy/#azure">https://kubernetes.github.io/ingress-nginx/deploy/#azure</a>
+            Also take a look at the config for azure:
+            <a href="https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli#create-an-ingress-controller"
+              >https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli#create-an-ingress-controller</a
+            >
           </p>
-          <p>
-            Also take a look at the config for azure: <a href="https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli#create-an-ingress-controller">https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli#create-an-ingress-controller</a>
-          </p>
-          <p>
-            Make sure that externalTrafficPolicy flag is set to Local!
-          </p>
-          <p>
-            Also if we want to set, eg. - --enable-ssl-passthrough option we can do it now. Simply add this at the end of the arguments array:
-          </p>
+          <p>Make sure that externalTrafficPolicy flag is set to Local!</p>
+          <p>Also if we want to set, eg. - --enable-ssl-passthrough option we can do it now. Simply add this at the end of the arguments array:</p>
           <script type="editor" data-lang="yaml">
             apiVersion: apps/v1
             kind: Deployment
@@ -75,14 +72,12 @@
                     - --ingress-class=nginx
                     - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
                     ........
-                    ############ 
+                    ############
                     - --enable-ssl-passthrough
                     ############
                     ........
           </script>
-          <p>
-            Now we can run kubectl <i>apply -f ingress.yaml</i> and this will create a new namespace called <b>ingress-nginx</b> will all relevant resources.
-          </p>
+          <p>Now we can run kubectl <i>apply -f ingress.yaml</i> and this will create a new namespace called <b>ingress-nginx</b> will all relevant resources.</p>
           <p>
             To validate if everything is fine, let's run the below commands:
             <script type="editor" data-lang="bash">
@@ -146,8 +141,11 @@
           </script>
 
           <h2>CertManager</h2>
-          <h4>BELOW SHOWS HOW TO INSTALL CERT-MANAGER USING KUBECTL. APPARENTLY IF WE INSTALL USING HELM IT WILL BE LATER EASIER TO UPDATE THE MANIFESTS, ESPECIALLY USEFUL WHEN IMPLEMENTING WILDCARD DOMAINS IN AZURE! SO I RECOMMEND TO IGNORE THE ABOVE AND INSTALL WITH HELM!</h4>
-          <H4>HELM INSTALLATION eg: </H4>
+          <h4>
+            BELOW SHOWS HOW TO INSTALL CERT-MANAGER USING KUBECTL. APPARENTLY IF WE INSTALL USING HELM IT WILL BE LATER EASIER TO UPDATE THE MANIFESTS, ESPECIALLY USEFUL WHEN IMPLEMENTING WILDCARD
+            DOMAINS IN AZURE! SO I RECOMMEND TO IGNORE THE ABOVE AND INSTALL WITH HELM!
+          </h4>
+          <h4>HELM INSTALLATION eg:</h4>
           <pre>
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
@@ -160,7 +158,10 @@ helm upgrade cert-manager jetstack/cert-manager \
           </pre>
           <p>Install cert manager: <a href="https://cert-manager.io/docs/installation/kubectl/">https://cert-manager.io/docs/installation/kubectl/</a></p>
           <p>Verify the installation: kubectl get pods --namespace cert-manager</p>
-          <p>Now we need the Issuers (prod and stage). Take a look how the issuers may look like: <a href="https://cert-manager.io/docs/configuration/acme/">https://cert-manager.io/docs/configuration/acme/</a></p>
+          <p>
+            Now we need the Issuers (prod and stage). Take a look how the issuers may look like:
+            <a href="https://cert-manager.io/docs/configuration/acme/">https://cert-manager.io/docs/configuration/acme/</a>
+          </p>
           <script type="editor" data-lang="yaml">
             apiVersion: cert-manager.io/v1
             kind: ClusterIssuer
@@ -220,17 +221,22 @@ helm upgrade cert-manager jetstack/cert-manager \
           <h2>Azure-GithubActions</h2>
           <h3>Azure login preparation</h3>
           <p>
-            We have to follow steps 1-5 to setup the appriopriate permissions: <a href="https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/app-flask-push-dockerbuild.md">https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/app-flask-push-dockerbuild.md</a>
+            We have to follow steps 1-5 to setup the appriopriate permissions:
+            <a href="https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/app-flask-push-dockerbuild.md"
+              >https://github.com/Azure/aks-baseline-automation/blob/main/workloads/docs/app-flask-push-dockerbuild.md</a
+            >
             <br />
             The ghToAzAuth.sh variables may look like:<br />
-            <pre>
-              APPNAME=[PROJECT_NAME]
-              RG=[AKS resource group name, eg. rg]
-              GHORG=[your github user name]
-              GHREPO=[github repo name]
-              GHBRANCH=[git branch name, eg: master]
-              GHENV=[prod, stage, etc. This only matters if you use the github secrets]
-            </pre>
+          </p>
+          <pre>
+            APPNAME=[PROJECT_NAME]
+            RG=[AKS resource group name, eg. rg]
+            GHORG=[your github user name]
+            GHREPO=[github repo name]
+            GHBRANCH=[git branch name, eg: master]
+            GHENV=[prod, stage, etc. This only matters if you use the github secrets]
+          </pre>
+          <p>
             Execute the above script by running:
             <script type="editor" data-lang="bash">
               ##### jq needs to be installed, install it using brew install jq
@@ -238,24 +244,22 @@ helm upgrade cert-manager jetstack/cert-manager \
             </script>
             This should give us all necessary values, such as: AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID
           </p>
-          <p>
-            Now it will be possible to run a github action step:
-            <pre>
-              ...
-              jobs:
-                login-example:
-                  runs-on: ubuntu-latest
-                  environment: prod
-                  steps:                  
-                    ...
-                    - uses: azure/login@v1
-                      with:
-                        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-                        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-                        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-                        enable-AzPSSession: true
-            </pre>
-          </p>
+          <p>Now it will be possible to run a github action step:</p>
+          <pre>
+            ...
+            jobs:
+              login-example:
+                runs-on: ubuntu-latest
+                environment: prod
+                steps:                  
+                  ...
+                  - uses: azure/login@v1
+                    with:
+                      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                      subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                      enable-AzPSSession: true
+          </pre>
 
           <h3>Azure Container Registry</h3>
           <p>
@@ -296,15 +300,17 @@ helm upgrade cert-manager jetstack/cert-manager \
 
           <h3>Azure Container Registry Secret</h3>
           <p>
-            In order for kuber to pull images from ACR we need to create a secret with the ACR credentials. Take a look at this file <a href="acr.sh" target="_blank">acr.sh</a>.
-            Before executing it you have to change <b>SERVICE_PRINCIPAL_NAME</b> and <b>ACR_NAME</b> values where SERVICE_PRINCIPAL_NAME has to be a unique name.
-            <pre>
-              /bin/bash acr.sh
-            </pre>
-            Copy those values as you won't be able to retrieve them anymore. As an output this script will give us the secrets needed for the below command.
+            In order for kuber to pull images from ACR we need to create a secret with the ACR credentials. Take a look at this file <a href="acr.sh" target="_blank">acr.sh</a>. Before executing it
+            you have to change <b>SERVICE_PRINCIPAL_NAME</b> and <b>ACR_NAME</b> values where SERVICE_PRINCIPAL_NAME has to be a unique name.
           </p>
+          <pre>
+            /bin/bash acr.sh
+          </pre>
+          <p>Copy those values as you won't be able to retrieve them anymore. As an output this script will give us the secrets needed for the below command.</p>
           <p>
-            Now we have to create a secret itself (<a href="https://learn.microsoft.com/en-us/azure/container-registry/container-registry-auth-kubernetes#create-a-service-principal" target="_blank">reference</a>):
+            Now we have to create a secret itself (<a href="https://learn.microsoft.com/en-us/azure/container-registry/container-registry-auth-kubernetes#create-a-service-principal" target="_blank"
+              >reference</a
+            >):
             <script type="editor" data-lang="bash">
               kubectl create secret docker-registry regcred \
                 --namespace [namespace] \
@@ -316,9 +322,7 @@ helm upgrade cert-manager jetstack/cert-manager \
 
           <h2>Postgres, StatefulSet, Microsoft.Storage</h2>
           <a href="https://stackoverflow.com/a/53870415" target="_blank">https://stackoverflow.com/a/53870415</a>
-          <p>
-            Basically the manifest (statefulset and service) may look similar to: 
-          </p>
+          <p>Basically the manifest (statefulset and service) may look similar to:</p>
           <script type="editor" data-lang="yaml">
             apiVersion: apps/v1
             kind: StatefulSet
@@ -374,11 +378,9 @@ helm upgrade cert-manager jetstack/cert-manager \
                 - port: 5432
               selector:
                 app: postgresql
-
           </script>
-          <p>
-            In terms of the storageClassName we have to fist check what the provider gives us. Let's run
-            <pre>
+          <p>In terms of the storageClassName we have to fist check what the provider gives us. Let's run</p>
+          <pre>
 kubectl get sc
 
 ### output for azure:
@@ -392,9 +394,11 @@ managed                 disk.csi.azure.com   Delete          WaitForFirstConsume
 managed-csi             disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
 managed-csi-premium     disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
 managed-premium         disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   9d
-            </pre>
-            As you can see there are two types of the storage in azure (read more here: <a href="https://learn.microsoft.com/en-us/azure/aks/concepts-storage#azure-disk" target="_blank">https://learn.microsoft.com/en-us/azure/aks/concepts-storage#azure-disk</a>)
-            I tried the azurefile but due to the documentation, for the database purposes it's better to use the azuredisk intead, so `managed-csi` in particular. I am not sure though if that's correct...
+          </pre>
+          <p>
+            As you can see there are two types of the storage in azure (read more here:
+            <a href="https://learn.microsoft.com/en-us/azure/aks/concepts-storage#azure-disk" target="_blank">https://learn.microsoft.com/en-us/azure/aks/concepts-storage#azure-disk</a>) I tried the
+            azurefile but due to the documentation, for the database purposes it's better to use the azuredisk intead, so `managed-csi` in particular. I am not sure though if that's correct...
           </p>
 
           <h2>WILDCARD DOMAINS - see the secrets repo!</h2>

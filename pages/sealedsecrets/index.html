@@ -11,18 +11,18 @@
       <div class="inside">
         <div class="cards">
           <h2>Sealed Secrets by Bitnami</h2>
+          <h3>Installation</h3>
           <p>
-            <h3>Installation</h3>
             First let's add a new repo to Helm:
             <script type="editor" data-lang="bash">
               helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
-            </script>  
+            </script>
           </p>
           <p>
             We can now see the version:
             <script type="editor" data-lang="bash">
               helm search repo sealed
-            </script>  
+            </script>
           </p>
           <p>
             Install the sealed secrets controller (and create a cert):
@@ -31,7 +31,8 @@
             </script>
           </p>
           <p>
-            Now we have to edit the sealed-secrets controller and change the renew policy (basically turn it off: <a href="https://youtu.be/u0qtgUMLua0?t=1209">https://youtu.be/u0qtgUMLua0?t=1209</a>):
+            Now we have to edit the sealed-secrets controller and change the renew policy (basically turn it off:
+            <a href="https://youtu.be/u0qtgUMLua0?t=1209">https://youtu.be/u0qtgUMLua0?t=1209</a>):
             <script type="editor" data-lang="bash">
               kubectl edit deployment/sealed-secrets -n kube-system
             </script>
@@ -54,17 +55,19 @@
             </script>
             save and close the editor.
           </p>
+
+          <h3>Kubeseal CLI</h3>
           <p>
-            <h3>Kubeseal CLI</h3>
-            Install kubeseal locally. Kubeseal is used to encode the secrets from a local machine. Simply follow this: <a href="https://github.com/bitnami-labs/sealed-secrets#homebrew">https://github.com/bitnami-labs/sealed-secrets#homebrew</a>
+            Install kubeseal locally. Kubeseal is used to encode the secrets from a local machine. Simply follow this:
+            <a href="https://github.com/bitnami-labs/sealed-secrets#homebrew">https://github.com/bitnami-labs/sealed-secrets#homebrew</a>
           </p>
 
+          <h3>Usage</h3>
           <p>
-            <h3>Usage</h3>
             Let's say we have a secret manifest file called <i>secret.yaml</i>. Keep in mund that all the values inside have to be base64 encoded!
             <br />
-            Now that we have the bare secret file and the kubeseal cli, let's create the sealed version of that secret. 
-            The values will be encoded using the certificates that exists in our cluster only.
+            Now that we have the bare secret file and the kubeseal cli, let's create the sealed version of that secret. The values will be encoded using the certificates that exists in our cluster
+            only.
             <br />
             <script type="editor" data-lang="bash">
               kubeseal \
@@ -78,8 +81,8 @@
             You can now safely include the sealed-secret.yaml file to your repo.
           </p>
 
+          <h3>Docker regcred example</h3>
           <p>
-            <h3>Docker regcred example</h3>
             <script type="editor" data-lang="bash">
               kubectl create secret docker-registry regcred \
                 --docker-server=docker-registry.domain.com \

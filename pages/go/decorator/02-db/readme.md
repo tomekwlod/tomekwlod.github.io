@@ -1,4 +1,4 @@
-now let's say we want to inject something to our myOwnFn. We could use a global but it's not ideal. 
+now let's say we want to inject something to our myOwnFn. We could use a global but it's not ideal.
 
 - so we define our DB interface and implement it with our Store
 
@@ -16,6 +16,7 @@ func (s *Store) Save(str string) error {
 ```
 
 - next we can modify our myOwnFn so it takes the db interface. It has to return the type of the 3rd party function in order to satisfy this type
+
 ```
 func myOwnFn(db DB) ExecuteFn {
 	return func(s string) {
@@ -28,6 +29,7 @@ func myOwnFn(db DB) ExecuteFn {
 ```
 
 - then in a main function we can initialize our store and pass it to the modified own function:
+
 ```
 func main() {
 	store := &Store{}
@@ -35,4 +37,3 @@ func main() {
 	Execute(myOwnFn(store))
 }
 ```
-
