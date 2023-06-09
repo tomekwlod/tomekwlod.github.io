@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>tomekwlod.github.io</title>
+  </head>
+  <body class="layout" toc>
+    <div class="body">
+      <div class="inside">
+        <div class="cards">
+          <h2>Multiple SSH accounts for Github</h2>
+          <h3>Step 1. Generate ssh keys using command:</h3>
+          <script type="editor" data-lang="bash">
+            ssh-keygen -t rsa -b 4096 -C "private@email.com"
+            ssh-keygen -t rsa -b 4096 -C "work@email.com"
+          </script>
+          <p>Remember to specify different path to both of that keys!</p>
+
+          <h3>Step 2. Add public keys to github</h3>
+
+          <h3>Step 3. Add keys to the agent</h3>
+          <script type="editor" data-lang="bash">
+            ssh-add ~/.ssh/first_key
+            ssh-add ~/.ssh/second_key
+          </script>
+
+          <h3>Step 4. Config</h3>
+          <p>Create a ~/.ssh/config file with the content similar to:</p>
+          <script type="editor" data-lang="bash">
+            Host private
+              Hostname github.com
+              User git
+              IdentityFile ~/.ssh/id_rsa
+              IdentitiesOnly yes
+
+            Host work
+              Hostname github.com
+              User git
+              IdentityFile ~/.ssh/id_rsa_work
+              IdentitiesOnly yes
+          </script>
+
+          <h3>Step 5. Test</h3>
+          <script type="editor" data-lang="bash">
+            ssh -Tv private
+            ssh -Tv work
+          </script>
+
+          <h3>Step 6. Folders</h3>
+          <p>Create folders for your private and work projects, eg:</p>
+          <script type="editor" data-lang="bash">
+            mkdir -p ~/work
+            mkdir -p ~/priv
+          </script>
+
+          <h3>Step 7. Git config</h3>
+          <p>Open ~/.gitconfig file and make sure it looks somehow similar to:</p>
+          <script type="editor" data-lang="bash">
+            [user]
+              email = work@email.com
+              name = Default Username
+
+            [includeIf "gitdir:~/work/]
+                    path = ./.gitconfig.work
+            [includeIf "gitdir:~/private/]
+                    path = ./.gitconfig.private
+
+            [core]
+                    sshCommand = ssh
+          </script>
+
+          <h3>Step 8. Git accounts config</h3>
+          <p>Create a new config file (eg. ~/.gitconfig.work) for each github account with a content such as:</p>
+          <script type="editor" data-lang="bash">
+            [user]
+                    name = John Doe
+                    email = private@email.com
+            [core]
+                    sshCommand = "ssh -i ~/.ssh/id_rsa"
+          </script>
+
+          <h3>Step 8. Files</h3>
+          <p>
+            Let's copy the ./add.sh file into all the ~/priv/ and ~/work/ folders. Also in each of these locations create the .env file containing a single environmental variable, like so:
+            <script type="editor" data-lang="bash">
+              GIT_CONFIG_NAME=here-goes-the-name-of-the-config-eg-private-or-work
+            </script>
+          </p>
+
+          <h3>Step 9. Execute</h3>
+          <p>
+            Simply run the script:
+            <script type="editor" data-lang="bash">
+              /bin/bash add.sh git@github.com:accname/reponame.git [target-location]
+            </script>
+          </p>
+
+          <p>Now if you commit things from, say private folder, the private ssh/git config will be used, likewise the work folder.</p>
+        </div>
+      </div>
+    </div>
+    <script src="/js/github.js"></script>
+  </body>
+</html>
