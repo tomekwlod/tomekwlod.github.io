@@ -35,12 +35,12 @@ TARGET="$2"
 if [ -z "$TARGET" ]; then
   # split the string by the /
   arr=(${REPO//\// })
-  # take the last array element, then find .git string and replace it with an empty string; regex: ${variable/sub-string/to-be-replaced-by}
-  REPO_DIRECTORY=${arr[${#arr[@]} - 1]/.git/}
+  # take the last array element, then find .git string and replace it with an empty string
+  REPO_DIRECTORY=${arr[${#arr[@]} - 1]/%.git/} # https://riptutorial.com/bash/example/7580/replace-pattern-in-string#:~:text=%24%20echo%20%22%24%7Ba/-,%25,-g/N%7D%22%0AI
 else
 #   # split the string by the /
 #   arr=(${TARGET//\// })
-#   # take the last array element, then find .git string and replace it with an empty string; regex: ${variable/sub-string/to-be-replaced-by}
+#   # take the last array element
 #   REPO_DIRECTORY=${arr[${#arr[@]} - 1]}
   REPO_DIRECTORY=$TARGET
 fi
@@ -60,22 +60,40 @@ RE=$(git clone $REPO $TARGET 2>&1 >/dev/null)
 if [ "$?" != "0" ]; then
   echo -e "Something went wrong with cloning the repo. Here what seems to be the problem:"
   echo -e "\`$RE\`\n"
+  exit 1;
 fi
 
 # Exit script immediately if any command returns a non-zero exit status.
 set -e
 
 SHORTCUTS_PATH="$HOME/shortcuts"
-echo -e "Do you want to add this project to the vscode shortcuts in ${SHORTCUTS_PATH}\n"
+YESNO="n"
 
-mkdir -p $SHORTCUTS_PATH
+while true; do
+    read -p "Do you want to add this project to the vscode shortcuts located in ${SHORTCUTS_PATH}? " yn
+    case $yn in
+        [Yy]* ) YESNO=y; break;;
+        [Nn]* ) YESNO=n; break;;
+        * ) echo "Please answer yes or no";;
+    esac
+done
 
-PWD=$(cd $REPO_DIRECTORY && pwd -LP)
-$(cat <<EOF > $SHORTCUTS_PATH/$REPO_DIRECTORY
+if [ "$YESNO" = "y" ]; then
+  SHORTCUT_NAME=${REPO_DIRECTORY//./_}
+
+  mkdir -p $SHORTCUTS_PATH
+
+  PWD=$(cd $REPO_DIRECTORY && pwd -LP)
+
+  $(cat <<EOF > $SHORTCUTS_PATH/$SHORTCUT_NAME
 #!/bin/sh
 cd $PWD && code .
 EOF)
 
-chmod +x $SHORTCUTS_PATH/$REPO_DIRECTORY
+  chmod +x $SHORTCUTS_PATH/$SHORTCUT_NAME
 
-echo "Done."
+  echo "Shortcut '$SHORTCUT_NAME' added"
+fi
+
+
+echo -e "\nDone."
