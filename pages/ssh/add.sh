@@ -79,7 +79,7 @@ while true; do
 done
 
 if [ "$YESNO" = "y" ]; then
-  SHORTCUT_NAME=${REPO_DIRECTORY//./_}
+  SHORTCUT_NAME="$(basename $(pwd)):${REPO_DIRECTORY//./_}"
 
   mkdir -p $SHORTCUTS_PATH
 
@@ -94,6 +94,5 @@ EOF)
 
   echo "Shortcut '$SHORTCUT_NAME' added"
 fi
-
 
 echo -e "\nDone."
