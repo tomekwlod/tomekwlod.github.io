@@ -26,7 +26,7 @@
             </li>
           </ul>
           <br />
-          <h2>AKS setup</h2>
+          <h2>Azure setup</h2>
           <p>Create a cluster through the Azure Panel.</p>
           <p>
             In order to interact with the cluster from the cli, we need to install Azure CLI tool. You can follow
@@ -41,6 +41,30 @@
             <br />
             (for CI we need a different way to login, see more <a href="https://github.com/marketplace/actions/azure-login" target="_blank">here</a>)
           </p>
+          <p>To login to a specific tenant / directory we have to list the active subsriptions first:</p>
+          <pre>
+            az account tenant list
+            [output example:]
+            [
+              {
+                "id": "/tenants/8e07940e-6ef3-40ab-3456-52af33fba4c9",
+                "tenantId": "8e07940e-6ef3-40ab-3456-52af33fba4c9"
+              },
+              {
+                "id": "/tenants/48e08919-3ab3-2134-8429-21696172c823",
+                "tenantId": "48e08919-3ab3-2134-8429-21696172c823"
+              },
+              {
+                "id": "/tenants/ac4c473f-2134-4bf3-80a6-02ff111b01ba",
+                "tenantId": "ac4c473f-2134-4bf3-80a6-02ff111b01ba"
+              }
+            ]
+          </pre>
+          <p>Now you can login using:</p>
+          <pre>
+            az login --tenant "YOUR-TENANT-HASH-FROM-ABOVE-COMMAND" --allow-no-subscriptions
+            az group list # check if you can see the proper resource groups
+          </pre>
           <p>
             Once successfully logged in, go to the Kubernetes Services and select your cluster. Then if you click on <i>Connect</i> button you will see how to connect to the cluster. Basically we have
             to run two commands:
@@ -49,6 +73,33 @@
             az account set --subscription [the-hash-here]
             az aks get-credentials --resource-group [resource-group-name-here] --name [cluster-name-here]
           </pre>
+
+          <h3>Other useful commands:</h3>
+          <p>To get the resource ID of your resource group</p>
+          <pre>
+            az group show --name [[RESOURCE_GROUP]] --query id --output tsv
+          </pre>
+          <p>To create a Service Principal</p>
+          <pre>
+            az ad sp create-for-rbac --name [[APPNAME-OPTIONAL]] --scope [[ABOVE_GROUP_ID]] --role Contributor --sdk-auth
+          </pre>
+          <p>This will output a JSON object with some IDs.. normally you copy it and save it in eg. Github secrets under AZURE_CREDENTIALS, which will be needed for the login process, eg:</p>
+          <pre>
+            - name: 'Login via Azure CLI'
+              uses: azure/login@v1
+              with:
+                # az ad sp create-for-rbac --name [[APPNAME]] --role contributor --scopes /subscriptions/[[SUBSCRIPTION_ID]]/resourceGroups/[[RESOURCE_GROUP]] --sdk-auth
+                creds: ${{ secrets.AZURE_CREDENTIALS }}
+          </pre>
+          <p>When while deploying to Containers Services you may get this error:</p>
+          <pre>Error: The subscription is not registered to use namespace 'Microsoft.ContainerInstance'</pre>
+          <p>This means that we have to register this namespace in our subscription:</p>
+          <pre>
+              az account list --output table
+              az provider register --namespace Microsoft.ContainerInstance
+              az provider show --namespace Microsoft.ContainerInstance --query "registrationState"
+            </pre
+          >
 
           <h2>IngressNginx</h2>
           <p>Download the latest deploy.yaml file from: <a href="https://kubernetes.github.io/ingress-nginx/deploy/#azure">https://kubernetes.github.io/ingress-nginx/deploy/#azure</a></p>
